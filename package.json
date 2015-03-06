@@ -1,0 +1,10 @@
+{
+  "name": "mm_castle_server",
+  "version": "0.0.1",
+  "description": "server whoaaaaaaaa herrro frie",
+  "dependencies": {
+  	"socket.io" : "*",
+  	"mongoose" : "*"
+  },
+  "author" : "Paulius Veliulis"
+}
