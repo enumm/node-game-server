@@ -1,6 +1,7 @@
 var databaseEngine = module.exports = {}
 var mongoose = require('mongoose');
 var Const = require('./constants');
+var uuid = require('node-uuid');
 var dataBase = false;
 var userSchema = false;
 var userDB = false;
@@ -13,7 +14,7 @@ databaseEngine.init = function() {
 	dataBase = mongoose.connection;
 	dataBase.on('error', console.error.bind(console, 'connection error:'));
 	dataBase.once('open', function (callback) {
-	  console.log('Connected to data base');
+	  console.log('Connected to database');
 	});
 
 	userSchema = mongoose.Schema({
@@ -62,4 +63,26 @@ databaseEngine.register_user = function(data, socket) {
   			});
     	}
     });
+};
+
+databaseEngine.login_user = function(data, socket) {
+	userDB.findOne({username: data.name}, function (err, user) {
+		if (err){
+    		console.error(err);
+    		socket.emit('user_login_responce',  {success: false, message: 'Database error :S'});	
+    	}
+    	else if(user){
+    		if(user.password == data.pass){
+    			socket.clientId = uuid();
+    			socket.username = user.username;
+    			socket.emit('user_login_responce',  {success: true, message: socket.clientId, uuid: socket.clientId});
+    		}
+    		else{
+    			socket.emit('user_login_responce',  {success: false, message: 'Invalid username/password'});
+    		}
+    	}
+    	else{
+    		socket.emit('user_login_responce',  {success: false, message: 'Invalid username/password'});
+    	}
+	});
 };

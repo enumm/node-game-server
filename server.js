@@ -15,17 +15,14 @@ io.on('connection', function (socket) {
     database.register_user(data, socket);
   });
 
+  socket.on('user_login', function (data) {
+    database.login_user(data, socket);
+  });
 
-
-
-  socket.on('login', function (data) {
-    console.log('log in for: ' + data.name );
-
-    var userDetails = loginUser(data)
-    if(userDetails){
-      socket.emit('authenticated', userDetails);
-    }else{
-      socket.emit('unknowUser');
+  socket.on('user_authenticated', function (data) {
+    if(socket.clientId == data.uuid){
+      console.log('User: "' + socket.username + '" authenticated');
+      //add user to room or smth...
     }
   });
 });
