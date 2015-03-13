@@ -1,6 +1,7 @@
 var io = require('socket.io')();
 var Const = require('./constants');
 var database = require('./databaseEngine');
+var lobby = require('./game.lobby.js');
 
 io.listen(Const.Server.Port);
 console.log('Game server starting');
@@ -21,8 +22,27 @@ io.on('connection', function (socket) {
 
   socket.on('user_authenticated', function (data) {
     if(socket.clientId == data.uuid){
+      socket.rdy = true;
       console.log('User: "' + socket.username + '" authenticated');
-      //add user to room or smth...
     }
   });
+
+  socket.on('find_game', function (data) {
+    if(socket.rdy){
+      console.log('User: "' + socket.username + '" wants to play'); 
+      lobby.findGame(socket);
+    }
+  });
+
+  socket.on('end_game', function (data) {
+    if(socket.game && socket.game.id) {
+      lobby.endGame(socket.game.id, socket.username);
+    }
+  });
+
+   socket.on('disconnect', function () {
+    if(socket.game && socket.game.id) {
+      lobby.endGame(socket.game.id, socket.username);
+    }
+  }); 
 });

@@ -74,7 +74,7 @@ databaseEngine.login_user = function(data, socket) {
     	else if(user){
     		if(user.password == data.pass){
     			socket.clientId = uuid();
-    			socket.username = user.username;
+    			socket.username = data.name;
     			socket.emit('user_login_responce',  {success: true, message: socket.clientId, uuid: socket.clientId});
     		}
     		else{
