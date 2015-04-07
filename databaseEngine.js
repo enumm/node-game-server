@@ -5,6 +5,8 @@ var uuid = require('node-uuid');
 var dataBase = false;
 var userSchema = false;
 var userDB = false;
+var bcrypt = require('bcrypt');
+var hashRounds = 12;
  
 
 databaseEngine.init = function() {
@@ -49,18 +51,22 @@ databaseEngine.register_user = function(data, socket) {
     		socket.emit('user_register_responce',  {success: false, message: 'User already exists'});
     	}
     	else{
-    		var user = new userDB({ username: data.name, password: data.pass,friends: [], statistics: {win: 0, loss: 0} });
+            bcrypt.genSalt(hashRounds, function(err, salt) {
+                bcrypt.hash(data.pass, salt, function(err, hashed) {
+                    var user = new userDB({ username: data.name, password: hashed ,friends: [], statistics: {win: 0, loss: 0} });
 
-    		user.save(function (err, user) {
-	  			if (err){
-	  				console.error(err);
-	  				socket.emit('user_register_responce',  {success: false, message: 'Database error :S'});	
-	  			}
-	  			else if(user){
-	  				console.log('user: "' + user.username + ' "created');
-	  				socket.emit('user_register_responce',  {success: true, message: 'User: ' + user.username + ' created'});	
-	  			}
-  			});
+                    user.save(function (err, user) {
+                        if (err){
+                            console.error(err);
+                            socket.emit('user_register_responce',  {success: false, message: 'Database error :S'}); 
+                        }
+                        else if(user){
+                            console.log('user: "' + user.username + ' "created');
+                            socket.emit('user_register_responce',  {success: true, message: 'User: ' + user.username + ' created'});    
+                        }
+                    });
+                });
+            });
     	}
     });
 };
@@ -72,15 +78,20 @@ databaseEngine.login_user = function(data, socket) {
     		socket.emit('user_login_responce',  {success: false, message: 'Database error :S'});	
     	}
     	else if(user){
-    		if(user.password == data.pass){
-    			socket.clientId = uuid();
-    			socket.username = data.name;
-    			socket.emit('user_login_responce',  {success: true, message: socket.clientId, uuid: socket.clientId});
-    		}
-    		else{
-    			socket.emit('user_login_responce',  {success: false, message: 'Invalid username/password'});
-    		}
-    	}
+            bcrypt.genSalt(hashRounds, function(err, salt) {
+                bcrypt.hash(data.pass, salt, function(err, hashed) {
+                    bcrypt.compare(data.pass, hashed, function(err, res) {
+                        if(res){
+                            socket.clientId = uuid();
+                            socket.username = data.name;
+                            socket.emit('user_login_responce',  {success: true, message: socket.clientId, uuid: socket.clientId});
+                        }else{
+                            socket.emit('user_login_responce',  {success: false, message: 'Invalid username/password'});
+                        }
+                    });
+                });
+            });
+        }
     	else{
     		socket.emit('user_login_responce',  {success: false, message: 'Invalid username/password'});
     	}
