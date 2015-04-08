@@ -78,19 +78,15 @@ databaseEngine.login_user = function(data, socket) {
     		socket.emit('user_login_responce',  {success: false, message: 'Database error :S'});	
     	}
     	else if(user){
-            bcrypt.genSalt(hashRounds, function(err, salt) {
-                bcrypt.hash(data.pass, salt, function(err, hashed) {
-                    bcrypt.compare(data.pass, hashed, function(err, res) {
-                        if(res){
-                            socket.clientId = uuid();
-                            socket.username = data.name;
-                            socket.emit('user_login_responce',  {success: true, message: socket.clientId, uuid: socket.clientId});
-                        }else{
-                            socket.emit('user_login_responce',  {success: false, message: 'Invalid username/password'});
-                        }
-                    });
-                });
-            });
+            bcrypt.compare(data.pass, user.password, function(err, res) {
+                if(res){
+                    socket.clientId = uuid();
+                    socket.username = data.name;
+                    socket.emit('user_login_responce',  {success: true, message: socket.clientId, uuid: socket.clientId});
+                }else{
+                    socket.emit('user_login_responce',  {success: false, message: 'Invalid username/password'});
+                }
+            }); 
         }
     	else{
     		socket.emit('user_login_responce',  {success: false, message: 'Invalid username/password'});
