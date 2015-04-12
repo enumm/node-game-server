@@ -34,6 +34,10 @@ io.on('connection', function (socket) {
     }
   });
 
+  socket.on('message', function(m) {
+    lobby.onMessage(socket, m);
+  });
+
   socket.on('end_game', function (data) {
     if(socket.game && socket.game.id) {
       lobby.endGame(socket.game.id, socket.username);

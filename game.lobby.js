@@ -4,8 +4,17 @@ var verbose = true;
 
 global.window = global.document = global;
 
+require('./game.core.js');
+
 lobby.log = function() {
     if(verbose) console.log.apply(this,arguments);
+};
+
+
+lobby.onMessage = function(client,message) {
+    if(client && client.game && client.game.gamecore) {
+        client.game.gamecore.handle_server_input(client, message);
+    }
 };
 
 lobby.startGame = function(game) {
@@ -17,15 +26,10 @@ lobby.startGame = function(game) {
     game.player_host.emit('notification', {message: 'joined a game with: ' + game.player_client.username });
     game.player_client.emit('notification', {message: 'joined a game with: ' + game.player_host.username });
     game.player_client.game = game;
+    game.gamecore.update( new Date().getTime() );
 
-        //now we tell both that the game is ready to start
-        //clients will reset their positions in this case.
-    // game.player_client.send('s.r.'+ String(game.gamecore.local_time).replace('.','-'));
-    // game.player_host.send('s.r.'+ String(game.gamecore.local_time).replace('.','-'));
-
-        //set this flag, so that the update loop can run it.
+    //set this flag, so that the update loop can run it.
     game.active = true;
-
 }; //game_server.startGame
 
 lobby.createGame = function(player) {
@@ -44,9 +48,9 @@ lobby.createGame = function(player) {
 
     //Create a new game core instance, this actually runs the
     //game code like collisions and such.
-    //thegame.gamecore = new game_core( thegame );
+    thegame.gamecore = new game_core(thegame);
     //Start updating the game loop on the server
-    //thegame.gamecore.update( new Date().getTime() );
+    // thegame.gamecore.update( new Date().getTime() );
 
     //tell the player that they are now the host
     //s=server message, h=you are hosting
@@ -86,7 +90,9 @@ lobby.findGame = function(player) {
                 //increase the player count and store
                 //the player as the client of this game
                 game_instance.player_client = player;
-                //game_instance.gamecore.players.other.instance = player;
+
+                game_instance.gamecore.players.other = player;
+
                 game_instance.player_count++;
 
                 //start running the game on the server,
@@ -155,6 +161,12 @@ lobby.endGame = function(gameid, username) {
                 thegame.player_client.emit('game_ended', {msg: 'Game ended, player: "' + username + '" disconected'})
             }
 
+            thegame.gamecore.players.other = null;
+            thegame.gamecore.players.self = null;
+
+            delete thegame.gamecore.players.other;
+            delete thegame.gamecore.players.self;
+            
             delete this.games[gameid];
             this.game_count--;
 
@@ -163,5 +175,4 @@ lobby.endGame = function(gameid, username) {
         } else {
             this.log('that game was not found!');
         }
-
-    }; //game_server.endGame
+};
