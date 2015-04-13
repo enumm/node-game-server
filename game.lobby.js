@@ -23,8 +23,12 @@ lobby.startGame = function(game) {
     //tell the other client they are joining a game
     //s=server message, j=you are joining, send them the host id
 
-    game.player_host.emit('notification', {message: 'joined a game with: ' + game.player_client.username });
-    game.player_client.emit('notification', {message: 'joined a game with: ' + game.player_host.username });
+    // game.player_host.emit('notification', {message: 'joined a game with: ' + game.player_client.username });
+    // game.player_client.emit('notification', {message: 'joined a game with: ' + game.player_host.username });
+
+    game.player_host.emit('game_starting', {opponent: game.player_client.username, host: true });
+    game.player_client.emit('game_starting', {opponent: game.player_host.username, host: false });
+    
     game.player_client.game = game;
     game.gamecore.update( new Date().getTime() );
 

@@ -71,12 +71,12 @@ game_core.prototype.update_physics = function() {
     //this.instance.player_client.emit('hello', {msg:'physics loop'});
             //Send the snapshot to the 'host' player
     if(this.players.self) {
-        this.players.self.emit('hello', {msg:'physics loop'});
+        this.players.self.emit('hello', {msg:'physics loop, time: ' + this._pdt});
     }
 
         //Send the snapshot to the 'client' player
     if(this.players.other) {
-        this.players.other.emit('hello', {msg:'physics loop'});
+        this.players.other.emit('hello', {msg:'physics loop, time: ' + this._pdt});
     }
 };
 
