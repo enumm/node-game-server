@@ -13,6 +13,7 @@ lobby.log = function() {
 
 lobby.onMessage = function(client,message) {
     if(client && client.game && client.game.gamecore) {
+        //console.log('data message from: ' + client.username);
         client.game.gamecore.handle_server_input(client, message);
     }
 };
@@ -158,10 +159,14 @@ lobby.endGame = function(gameid, username) {
             }
 
             if(thegame.player_host){
+                delete thegame.player_host.game;
+                thegame.player_host.game = null;
                 thegame.player_host.emit('game_ended', {msg: 'Game ended, player: "' + username + '" disconected'})
             }
 
             if(thegame.player_client){
+                delete thegame.player_client.game;
+                thegame.player_client.game = null;
                 thegame.player_client.emit('game_ended', {msg: 'Game ended, player: "' + username + '" disconected'})
             }
 

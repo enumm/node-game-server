@@ -58,6 +58,28 @@ game_core.prototype.create_timer = function(){
     }.bind(this), 4);
 }
 
+game_core.prototype.handle_server_input = function(client, message){
+    if(client.hosting){
+        if(this.verifyData(this.hostData, message)){
+            this.hostData  = message;
+        }
+    }else{
+        if(this.verifyData(this.guestData, message)){
+            this.guestData  = message;
+        }
+    }
+
+    this.updateRequired = true;
+};
+
+game_core.prototype.verifyData = function(good, fuckingBad) {
+    if(good.money >= bafuckingBad.money){
+        return true;
+    }else{
+        return false;
+    }
+};
+
 game_core.prototype.create_physics_simulation = function() {
     setInterval(function(){
         this._pdt = (new Date().getTime() - this._pdte)/1000.0;
@@ -69,14 +91,18 @@ game_core.prototype.create_physics_simulation = function() {
 game_core.prototype.update_physics = function() {
     //this.instance.player_host.emit('hello', {msg:'physics loop'});
     //this.instance.player_client.emit('hello', {msg:'physics loop'});
-            //Send the snapshot to the 'host' player
-    if(this.players.self) {
-        this.players.self.emit('hello', {msg:'physics loop, time: ' + this._pdt});
-    }
+
+    if(this.updateRequired){
+        this.updateRequired = false;
+        //Send the snapshot to the 'host' player
+        if(this.players.self) {
+            this.players.self.emit('hello', {msg:'physics loop, time: ' + this._pdt});
+        }
 
         //Send the snapshot to the 'client' player
-    if(this.players.other) {
-        this.players.other.emit('hello', {msg:'physics loop, time: ' + this._pdt});
+        if(this.players.other) {
+            this.players.other.emit('hello', {msg:'physics loop, time: ' + this._pdt});
+        }
     }
 };
 
@@ -85,6 +111,8 @@ game_core.prototype.server_update = function(){
     //Update the state of our local clock to match the timer
     this.server_time = this.local_time;
 
+    this.hostData = {money: 5};
+    this.guestData = {money: 5};
     //Make a snapshot of the current state, for updating the clients
     // this.laststate = {
     //     hp  : this.players.self.pos,                //'host position', the game creators position
