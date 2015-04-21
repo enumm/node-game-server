@@ -73,7 +73,7 @@ game_core.prototype.handle_server_input = function(client, message){
 };
 
 game_core.prototype.verifyData = function(good, fuckingBad) {
-    if(good.money >= bafuckingBad.money){
+    if(good.money >= fuckingBad.money){
         return true;
     }else{
         return false;
@@ -92,16 +92,24 @@ game_core.prototype.update_physics = function() {
     //this.instance.player_host.emit('hello', {msg:'physics loop'});
     //this.instance.player_client.emit('hello', {msg:'physics loop'});
 
+    this.moneyUpdateTimer +=  this._pdt;
+    if(this.moneyUpdateTimer >= 10)
+    {
+            this.hostData.money += 5;
+            this.guestData.money += 5;
+            this.moneyUpdateTimer  = 0;
+    }
+
     if(this.updateRequired){
         this.updateRequired = false;
         //Send the snapshot to the 'host' player
         if(this.players.self) {
-            this.players.self.emit('hello', {msg:'physics loop, time: ' + this._pdt});
+            this.players.self.emit('message', this.hostData);
         }
 
         //Send the snapshot to the 'client' player
         if(this.players.other) {
-            this.players.other.emit('hello', {msg:'physics loop, time: ' + this._pdt});
+            this.players.other.emit('message', this.guestData);
         }
     }
 };
@@ -113,6 +121,7 @@ game_core.prototype.server_update = function(){
 
     this.hostData = {money: 5};
     this.guestData = {money: 5};
+    this.moneyUpdateTimer = 0;
     //Make a snapshot of the current state, for updating the clients
     // this.laststate = {
     //     hp  : this.players.self.pos,                //'host position', the game creators position
