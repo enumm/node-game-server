@@ -104,12 +104,12 @@ game_core.prototype.update_physics = function() {
         this.updateRequired = false;
         //Send the snapshot to the 'host' player
         if(this.players.self) {
-            this.players.self.emit('message', this.hostData);
+            this.players.self.emit('message', this.hostData, this.guestData);
         }
 
         //Send the snapshot to the 'client' player
         if(this.players.other) {
-            this.players.other.emit('message', this.guestData);
+            this.players.other.emit('message', this.guestData, this.hostData);
         }
     }
 };
@@ -119,8 +119,8 @@ game_core.prototype.server_update = function(){
     //Update the state of our local clock to match the timer
     this.server_time = this.local_time;
 
-    this.hostData = {money: 5};
-    this.guestData = {money: 5};
+    this.hostData = {money: 5, buildings: []};
+    this.guestData = {money: 5, buildings: []};
     this.moneyUpdateTimer = 0;
     //Make a snapshot of the current state, for updating the clients
     // this.laststate = {
