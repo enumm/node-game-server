@@ -60,19 +60,34 @@ game_core.prototype.create_timer = function(){
 
 game_core.prototype.handle_server_input = function(client, message){
     if(client.hosting){
-        if(this.verifyData(this.hostData, message)){
-            this.hostData  = message;
-        }
+        this.verifyData(this.hostData, message);
+        //if(this.verifyData(this.hostData, message)){
+            //console.log('<<-----setting host data ' + message.buildings.length);
+            //this.hostData  = message;
+        //}
     }else{
-        if(this.verifyData(this.guestData, message)){
-            this.guestData  = message;
-        }
+        //if(this.verifyData(this.guestData, message)){
+            this.verifyData(this.guestData, message);
+            //console.log('<<-----setting guest data ' + message.buildings.length);
+            //this.guestData  = message;
+        //}
     }
 
     this.updateRequired = true;
 };
 
 game_core.prototype.verifyData = function(good, fuckingBad) {
+    fuckingBad.buildings.forEach(function(item) {
+        if(!item.old){
+            if(fuckingBad.money >= item.price && good.money >= item.price){
+                item.old = true;
+                good.buildings.push(item);
+                fuckingBad.money -= item.price;
+                good.money -= item.price;
+            }
+        }
+    });
+
     if(good.money >= fuckingBad.money){
         return true;
     }else{
@@ -101,16 +116,20 @@ game_core.prototype.update_physics = function() {
     }
 
     if(this.updateRequired){
-        this.updateRequired = false;
+        
         //Send the snapshot to the 'host' player
         if(this.players.self) {
+            //console.log('--->sending host data ' + this.hostData.buildings.length);
             this.players.self.emit('message', this.hostData, this.guestData);
         }
 
         //Send the snapshot to the 'client' player
         if(this.players.other) {
+            //console.log('--->sending guest data ' + this.guestData.buildings.length);
             this.players.other.emit('message', this.guestData, this.hostData);
         }
+
+        this.updateRequired = false;
     }
 };
 
