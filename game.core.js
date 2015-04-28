@@ -138,8 +138,8 @@ game_core.prototype.server_update = function(){
     //Update the state of our local clock to match the timer
     this.server_time = this.local_time;
 
-    this.hostData = {money: 5, buildings: []};
-    this.guestData = {money: 5, buildings: []};
+    this.hostData = {money: 5, buildings: [], units: []};
+    this.guestData = {money: 5, buildings: [], units: []};
     this.moneyUpdateTimer = 0;
     //Make a snapshot of the current state, for updating the clients
     // this.laststate = {
