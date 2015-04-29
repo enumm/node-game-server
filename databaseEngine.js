@@ -34,21 +34,21 @@ databaseEngine.init = function() {
 
 databaseEngine.register_user = function(data, socket) {
 	if(data.name.length < Const.DataBase.MinUserNameLenght){
-		socket.emit('user_register_responce',  {success: false, message: 'Username is too short'});
+		socket.emit('user_register_response',  {success: false, message: 'Username is too short'});
         return false;
     }
     if(data.pass.length <  Const.DataBase.MinPassLenght){
-    	socket.emit('user_register_responce',  {success: false, message: 'Password is too short'});
+    	socket.emit('user_register_response',  {success: false, message: 'Password is too short'});
         return false;
     }
 
     userDB.findOne({username: data.name}, function (err, user) {
     	if (err){
     		console.error(err);
-    		socket.emit('user_register_responce',  {success: false, message: 'Database error :S'});	
+    		socket.emit('user_register_response',  {success: false, message: 'Database error :S'});	
     	}
     	else if(user){
-    		socket.emit('user_register_responce',  {success: false, message: 'User already exists'});
+    		socket.emit('user_register_response',  {success: false, message: 'User already exists'});
     	}
     	else{
             bcrypt.genSalt(hashRounds, function(err, salt) {
@@ -58,11 +58,11 @@ databaseEngine.register_user = function(data, socket) {
                     user.save(function (err, user) {
                         if (err){
                             console.error(err);
-                            socket.emit('user_register_responce',  {success: false, message: 'Database error :S'}); 
+                            socket.emit('user_register_response',  {success: false, message: 'Database error :S'}); 
                         }
                         else if(user){
                             console.log('user: "' + user.username + ' "created');
-                            socket.emit('user_register_responce',  {success: true, message: 'User: ' + user.username + ' created'});    
+                            socket.emit('user_register_response',  {success: true, message: 'User: ' + user.username + ' created'});    
                         }
                     });
                 });
@@ -75,21 +75,21 @@ databaseEngine.login_user = function(data, socket) {
 	userDB.findOne({username: data.name}, function (err, user) {
 		if (err){
     		console.error(err);
-    		socket.emit('user_login_responce',  {success: false, message: 'Database error :S'});	
+    		socket.emit('user_login_response',  {success: false, message: 'Database error :S'});	
     	}
     	else if(user){
             bcrypt.compare(data.pass, user.password, function(err, res) {
                 if(res){
                     socket.clientId = uuid();
                     socket.username = data.name;
-                    socket.emit('user_login_responce',  {success: true, message: socket.clientId, uuid: socket.clientId});
+                    socket.emit('user_login_response',  {success: true, message: socket.clientId, uuid: socket.clientId});
                 }else{
-                    socket.emit('user_login_responce',  {success: false, message: 'Invalid username/password'});
+                    socket.emit('user_login_response',  {success: false, message: 'Invalid username/password'});
                 }
             }); 
         }
     	else{
-    		socket.emit('user_login_responce',  {success: false, message: 'Invalid username/password'});
+    		socket.emit('user_login_response',  {success: false, message: 'Invalid username/password'});
     	}
 	});
 };
