@@ -88,6 +88,13 @@ game_core.prototype.verifyData = function(good, fuckingBad) {
         }
     });
 
+    fuckingBad.units.forEach(function(item) {
+        if(!item.old){
+            item.old = true;
+            good.units.push(item);
+        }
+    });
+
     if(good.money >= fuckingBad.money){
         return true;
     }else{
