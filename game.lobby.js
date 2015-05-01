@@ -38,16 +38,17 @@ lobby.startGame = function(game) {
     game.active = true;
 }; //game_server.startGame
 
-lobby.createGame = function(player) {
+lobby.createGame = function(player, gameType) {
     //Create a new game instance
     var thegame = {
         id : uuid(),                //generate a new id for the game
         player_host:player,         //so we know who initiated the game
         player_client:null,         //nobody else joined yet, since its new
-        player_count:1              //for simple checking of state
+        player_count:1,              //for simple checking of state
+        game_type:gameType
     };
 
-    this.games[ thegame.id ] = thegame;
+    this.games[thegame.id] = thegame;
 
     //Keep track
     this.game_count++;
@@ -74,8 +75,9 @@ lobby.createGame = function(player) {
     return thegame;
 }; 
 
-lobby.findGame = function(player) {
+lobby.findGame = function(player, gameType) {
     this.log('User: "' + player.username + '" is looking for a game, game count: ' + this.game_count);
+    this.log('GameType: "' + gameType);
 
     if(this.game_count) {
         var inGame = false;
@@ -89,21 +91,19 @@ lobby.findGame = function(player) {
 
             //get the game we are checking against
             var game_instance = this.games[gameid];
+
             //If the game is a player short
-            if(game_instance.player_count < 2) {
+            if(game_instance.game_type == gameType && game_instance.player_count < 2) {
                 //someone wants us to join!
                 inGame = true;
                 //increase the player count and store
                 //the player as the client of this game
                 game_instance.player_client = player;
-
                 game_instance.gamecore.players.other = player;
-
                 game_instance.player_count++;
 
                 //start running the game on the server,
                 //which will tell them to respawn/start
-                
                 this.startGame(game_instance);
             } 
             //if less than 2 players
@@ -112,14 +112,12 @@ lobby.findGame = function(player) {
         //now if we didn't join a game,
         //we must create one
         if(!inGame) {
-            
-            this.createGame(player);
-
+            this.createGame(player, gameType);
         } //if no join already
     } else { //if there are any games at all
         //no games? create one!
         
-        this.createGame(player);
+        this.createGame(player, gameType);
     }
 }; //game_server.findGame
 

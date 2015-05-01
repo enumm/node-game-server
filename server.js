@@ -30,7 +30,7 @@ io.on('connection', function (socket) {
   socket.on('find_game', function (data) {
     if(socket.rdy && !socket.game){
       console.log('User: "' + socket.username + '" wants to play'); 
-      lobby.findGame(socket);
+      lobby.findGame(socket, data.gameType);
     }
   });
 
