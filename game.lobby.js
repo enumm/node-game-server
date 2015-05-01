@@ -1,3 +1,4 @@
+//# sourceURL=game.lobby.js
 var lobby = module.exports = { games : {}, game_count:0 };
 var uuid = require('node-uuid');
 var verbose = true;
@@ -168,6 +169,40 @@ lobby.endGame = function(gameid, username) {
                 delete thegame.player_client.game;
                 thegame.player_client.game = null;
                 thegame.player_client.emit('game_ended', {msg: 'Game ended, player: "' + username + '" disconected'})
+            }
+
+            thegame.gamecore.players.other = null;
+            thegame.gamecore.players.self = null;
+
+            delete thegame.gamecore.players.other;
+            delete thegame.gamecore.players.self;
+            
+            delete this.games[gameid];
+            this.game_count--;
+
+            this.log('game removed. there are now ' + this.game_count + ' games' );
+
+        } else {
+            this.log('that game was not found!');
+        }
+};
+
+lobby.stopMatching = function(gameid, username) {
+
+        var thegame = this.games[gameid];
+        //TODO: DONT KNOW WHATS NEEDED HERE WHATS NOT
+        if(thegame) {
+
+            if(thegame.player_host){
+                delete thegame.player_host.game;
+                thegame.player_host.game = null;
+                thegame.player_host.emit('matchmaking_canceled', {msg: 'Game ended, player: "' + username + '" disconected'})
+            }
+
+            if(thegame.player_client){
+                delete thegame.player_client.game;
+                thegame.player_client.game = null;
+                thegame.player_client.emit('matchmaking_canceled', {msg: 'Game ended, player: "' + username + '" disconected'})
             }
 
             thegame.gamecore.players.other = null;
