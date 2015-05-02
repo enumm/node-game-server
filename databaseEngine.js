@@ -50,7 +50,7 @@ databaseEngine.register_user = function(data, socket) {
     		socket.emit('user_register_response',  {success: false, message: 'Database error :S'});	
     	}
     	else if(user){
-    		socket.emit('user_register_response',  {success: false, message: 'User already exists'});
+    		socket.emit('user_register_response',  {success: false, message: 'User already exists', loginData: data});
     	}
     	else{
             bcrypt.genSalt(hashRounds, function(err, salt) {
@@ -64,7 +64,7 @@ databaseEngine.register_user = function(data, socket) {
                         }
                         else if(user){
                             console.log('user: "' + user.username + ' "created');
-                            socket.emit('user_register_response',  {success: true, message: 'User: ' + user.username + ' created'});    
+                            socket.emit('user_register_response',  {success: true, message: 'User: ' + user.username + ' created', loginData: data});    
                         }
                     });
                 });

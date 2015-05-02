@@ -88,18 +88,14 @@ game_core.prototype.verifyData = function(good, fuckingBad) {
         }
     });
 
-    fuckingBad.units.forEach(function(item) {
-        if(!item.old){
-            item.old = true;
-            good.units.push(item);
-        }
-    });
-
-    if(good.money >= fuckingBad.money){
-        return true;
-    }else{
-        return false;
-    }
+    // fuckingBad.units.forEach(function(item) {
+    //     if(!item.old){
+    //         item.old = true;
+    //         good.units.push(item);
+    //     }
+    // });
+    good.units = fuckingBad.units;
+    //good.units = good.units.filter(function (el) {return el.isDead;});
 };
 
 game_core.prototype.create_physics_simulation = function() {
