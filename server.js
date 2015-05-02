@@ -50,6 +50,12 @@ io.on('connection', function (socket) {
     }
   });
 
+  socket.on('get_user_statistics', function (data) {
+    if(socket.rdy) {
+      database.read_statistics(data, socket);
+    }
+  });
+
    socket.on('disconnect', function () {
     if(socket.game && socket.game.id) {
       lobby.endGame(socket.game.id, socket.username);

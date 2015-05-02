@@ -44,7 +44,7 @@ lobby.createGame = function(player, gameType) {
         id : uuid(),                //generate a new id for the game
         player_host:player,         //so we know who initiated the game
         player_client:null,         //nobody else joined yet, since its new
-        player_count:1,              //for simple checking of state
+        player_count:1,             //for simple checking of state
         game_type:gameType
     };
 

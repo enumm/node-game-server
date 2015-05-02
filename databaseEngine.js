@@ -24,8 +24,10 @@ databaseEngine.init = function() {
 	  password: String,
 	  friends: [{ username: String }],
 	  statistics: {
-	    win: Number,
-	    loss:  Number
+	    wins: Number,
+	    losses:  Number,
+        ranked_wins: Number,
+        rank: Number
 	  }	  
 	});
 
@@ -53,7 +55,7 @@ databaseEngine.register_user = function(data, socket) {
     	else{
             bcrypt.genSalt(hashRounds, function(err, salt) {
                 bcrypt.hash(data.pass, salt, function(err, hashed) {
-                    var user = new userDB({ username: data.name, password: hashed ,friends: [], statistics: {win: 0, loss: 0} });
+                    var user = new userDB({ username: data.name, password: hashed ,friends: [], statistics: {wins: 0, losses: 0, ranked_wins:0, rank:0} });
 
                     user.save(function (err, user) {
                         if (err){
@@ -92,4 +94,10 @@ databaseEngine.login_user = function(data, socket) {
     		socket.emit('user_login_response',  {success: false, message: 'Invalid username/password'});
     	}
 	});
+};
+
+databaseEngine.read_statistics = function(data, socket) {
+    userDB.findOne({username: socket.username}, function (err, user) {
+        socket.emit('set_user_data', {username: user.username, statistics : user.statistics});    
+    });
 };
