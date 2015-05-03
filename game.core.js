@@ -77,6 +77,8 @@ game_core.prototype.handle_server_input = function(client, message){
 };
 
 game_core.prototype.verifyData = function(good, fuckingBad) {
+    good.unitCount = fuckingBad.unitCount;
+    good.buildingCount = fuckingBad.buildingCount;
     fuckingBad.buildings.forEach(function(item) {
         if(!item.old){
             if(fuckingBad.money >= item.price && good.money >= item.price){
@@ -85,6 +87,13 @@ game_core.prototype.verifyData = function(good, fuckingBad) {
                 fuckingBad.money -= item.price;
                 good.money -= item.price;
             }
+        }
+        if(item.kill){
+            good.buildings.forEach(function(el){
+                if(el.name == item.name){
+                    el.kill = true;
+                }
+            });
         }
     });
 
@@ -141,8 +150,8 @@ game_core.prototype.server_update = function(){
     //Update the state of our local clock to match the timer
     this.server_time = this.local_time;
 
-    this.hostData = {money: 5, buildings: [], units: []};
-    this.guestData = {money: 5, buildings: [], units: []};
+    this.hostData = {money: 5, buildings: [], units: [], buildingCount: 0, unitCount: 0};
+    this.guestData = {money: 5, buildings: [], units: [], buildingCount: 0, unitCount: 0};
     this.moneyUpdateTimer = 0;
     //Make a snapshot of the current state, for updating the clients
     // this.laststate = {
@@ -155,11 +164,11 @@ game_core.prototype.server_update = function(){
 
         //Send the snapshot to the 'host' player
     if(this.players.self) {
-        this.players.self.emit('hello', {msg:'update loop'});
+        this.players.self.emit('hello', {msg:'Starting server game loop'});
     }
 
         //Send the snapshot to the 'client' player
     if(this.players.other) {
-        this.players.other.emit('hello', {msg:'update loop'});
+        this.players.other.emit('hello', {msg:'Starting server game loop'});
     }
 }; //game_core.server_update
