@@ -1,6 +1,7 @@
 //# sourceURL=game.lobby.js
 var lobby = module.exports = { games : {}, game_count:0 };
 var uuid = require('node-uuid');
+//var Const = require('./constants');
 var verbose = true;
 
 global.window = global.document = global;

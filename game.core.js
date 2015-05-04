@@ -15,11 +15,12 @@ var game_core = function(game_instance){
     this.local_time = 0.016;            //The local timer
     this._dt = new Date().getTime();    //The local timer delta
     this._dte = new Date().getTime();   //The local timer last frame time
+    
+    c = require('./constants');
 
     //Start a physics loop, this is separate to the rendering
     //as this happens at a fixed frequency
     this.create_physics_simulation();
-
     //Start a fast paced timer for measuring time easier
     this.create_timer();
     this.server_time = 0;
@@ -28,7 +29,7 @@ var game_core = function(game_instance){
 
 module.exports = global.game_core = game_core;
 
- var game_player = function( game_instance, player_instance ) {
+var game_player = function( game_instance, player_instance ) {
     //Store the instance, if any
     this.instance = player_instance;
     this.game = game_instance;
@@ -74,6 +75,12 @@ game_core.prototype.handle_server_input = function(client, message){
     this.updateRequired = true;
 };
 
+
+
+
+
+
+
 game_core.prototype.verifyData = function( good , fuckingBad) {
     //change
     good.unitCount = fuckingBad.unitCount;
@@ -81,11 +88,12 @@ game_core.prototype.verifyData = function( good , fuckingBad) {
 
     fuckingBad.buildings.forEach(function(item) {
         if(!item.old){
-            if(fuckingBad.money >= item.price && good.money >= item.price){
+            if(fuckingBad.money >= c.BuildingTypes[item.buildingType.name].cost && good.money >= c.BuildingTypes[item.buildingType.name].cost){
                 item.old = true;
+                item.hp = c.BuildingTypes[item.buildingType.name].life;
                 good.buildings.push(item);
-                fuckingBad.money -= item.price;
-                good.money -= item.price;
+                fuckingBad.money -= c.BuildingTypes[item.buildingType.name].cost;
+                good.money -= c.BuildingTypes[item.buildingType.name].cost;
             }
         }
         good.buildings.forEach(function(el){
@@ -101,6 +109,13 @@ game_core.prototype.verifyData = function( good , fuckingBad) {
     //change
     good.units = fuckingBad.units;
 };
+
+
+
+
+
+
+
 
 game_core.prototype.create_physics_simulation = function() {
     setInterval(function(){
