@@ -79,7 +79,7 @@ lobby.findGame = function(player, gameType) {
     this.log('User: "' + player.username + '" is looking for a game, game count: ' + this.game_count);
     this.log('GameType: "' + gameType);
 
-    if(game_instance.game_type != 'private' && this.game_count) {
+    if(gameType != 'private' && this.game_count) {
         var inGame = false;
 
         //Check the list of games for an open game
