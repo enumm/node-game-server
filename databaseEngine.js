@@ -98,7 +98,6 @@ databaseEngine.login_user = function(data, socket) {
 
 databaseEngine.read_statistics = function(data, socket) {
     userDB.findOne({username: socket.username}, function (err, user) {
-        console.log('found:' + user.username);
         socket.emit('show_user_data', {username: user.username, statistics : user.statistics});    
     });
 };
@@ -106,12 +105,11 @@ databaseEngine.read_statistics = function(data, socket) {
 databaseEngine.add_friend = function(data, socket) {
     userDB.findOne({username: socket.username}, function (err, user) {
         var alreadyAdded = false;
-        console.log(user.friends.length);
+        console.log("friends: " + user.friends.length);
         for(var i = 0; i < user.friends.length; i++){
-            console.log('a');
             if(user.friends[i].username == data.friendName){
                 alreadyAdded = true;
-                console.log('friend aldready added');
+                console.log('friend aldready added: ' + data.friendName);
             }
         }
         if(!alreadyAdded){
@@ -119,14 +117,15 @@ databaseEngine.add_friend = function(data, socket) {
                 if(err){
                     console.error(err);
                 }else if(!foundFriend){
-                    console.log("friend not found");
+                    console.log("friend not found: " + data.friendName);
                 }else{
-                    user.friends.push({name: foundFriend.username});    
+                    user.friends.push({username: foundFriend.username});
                     user.save(function(err, user){
-                        console.log("friend added:" + foundFriend.username);
+                        console.log("friend added: " + foundFriend.username);
                     });
+                    console.log(user.friends.length);
                     for(var i = 0; i < user.friends.length;i++){
-                        console.log(user.friends[i].name);
+                        console.log(user.friends[i].username);
                     }
                 }
             });
