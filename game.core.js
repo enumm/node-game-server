@@ -75,8 +75,10 @@ game_core.prototype.handle_server_input = function(client, message){
 };
 
 game_core.prototype.verifyData = function( good , fuckingBad) {
+    //change
     good.unitCount = fuckingBad.unitCount;
     good.buildingCount = fuckingBad.buildingCount;
+
     fuckingBad.buildings.forEach(function(item) {
         if(!item.old){
             if(fuckingBad.money >= item.price && good.money >= item.price){
@@ -86,23 +88,18 @@ game_core.prototype.verifyData = function( good , fuckingBad) {
                 good.money -= item.price;
             }
         }
-        if(item.kill){
-            good.buildings.forEach(function(el){
-                if(el.name == item.name){
-                    el.kill = true;
-                }
-            });
-        }
+        good.buildings.forEach(function(el){
+            if(el.name == item.name){
+                el.kill = item.kill;
+                el.producing = item.producing;
+            }
+        });
     });
+
     good.castleHp = fuckingBad.castleHp;
-    // fuckingBad.units.forEach(function(item) {
-    //     if(!item.old){
-    //         item.old = true;
-    //         good.units.push(item);
-    //     }
-    // });
+    
+    //change
     good.units = fuckingBad.units;
-    //good.units = good.units.filter(function (el) {return el.isDead;});
 };
 
 game_core.prototype.create_physics_simulation = function() {
