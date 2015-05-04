@@ -107,6 +107,7 @@ databaseEngine.read_friends = function(data, socket) {
         var friends = [];
         for(var i =0; i < user.friends.length; i++){
             friends.push(user.friends[i]);
+            console.log(user.friends[i].username);
         }
         socket.emit('get_user_friends_response', friends);    
     });
