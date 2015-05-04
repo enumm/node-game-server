@@ -56,9 +56,19 @@ io.on('connection', function (socket) {
     }
   });
 
+  socket.on('get_user_friends', function (data) {
+    if(socket.rdy) {
+      database.read_friends(data, socket);
+    }
+  });
+
   socket.on('add_friend', function (data) {
     if(socket.rdy) {
-      database.add_friend(data, socket);
+      if(socket.username != data.friendName){
+        database.add_friend(data, socket);
+      }else{
+        console.log("can't add self");
+      }
     }
   });
 

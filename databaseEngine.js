@@ -102,10 +102,22 @@ databaseEngine.read_statistics = function(data, socket) {
     });
 };
 
+databaseEngine.read_friends = function(data, socket) {
+    console.log('finding');
+    userDB.findOne({username: socket.username}, function (err, user) {
+        var friends = [];
+        for(var i =0; i < user.friends.length; i++){
+            friends.push(user.friends[i]);
+            console.log.friends[i];
+        }
+        console.log(friends);
+        socket.emit('get_user_friends_response', friends);    
+    });
+};
+
 databaseEngine.add_friend = function(data, socket) {
     userDB.findOne({username: socket.username}, function (err, user) {
         var alreadyAdded = false;
-        console.log("friends: " + user.friends.length);
         for(var i = 0; i < user.friends.length; i++){
             if(user.friends[i].username == data.friendName){
                 alreadyAdded = true;
