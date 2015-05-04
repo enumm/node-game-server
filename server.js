@@ -11,6 +11,10 @@ database.init();
 io.on('connection', function (socket) {
   socket.emit('hello', {msg:'hello, we are connected!!'});
 
+  socket.on('message', function(m) {
+    lobby.onMessage(socket, m);
+  });
+
   socket.on('user_register', function (data) {
     console.log('Create acc request');
     database.register_user(data, socket);
@@ -34,10 +38,6 @@ io.on('connection', function (socket) {
     }
   });
 
-  socket.on('message', function(m) {
-    lobby.onMessage(socket, m);
-  });
-
   socket.on('end_game', function (data) {
     if(socket.game && socket.game.id) {
       lobby.endGame(socket.game.id, socket.username);
@@ -53,6 +53,12 @@ io.on('connection', function (socket) {
   socket.on('get_user_statistics', function (data) {
     if(socket.rdy) {
       database.read_statistics(data, socket);
+    }
+  });
+
+  socket.on('add_friend', function (data) {
+    if(socket.rdy) {
+      database.add_friend(data, socket);
     }
   });
 

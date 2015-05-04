@@ -98,6 +98,38 @@ databaseEngine.login_user = function(data, socket) {
 
 databaseEngine.read_statistics = function(data, socket) {
     userDB.findOne({username: socket.username}, function (err, user) {
-        socket.emit('set_user_data', {username: user.username, statistics : user.statistics});    
+        console.log('found:' + user.username);
+        socket.emit('show_user_data', {username: user.username, statistics : user.statistics});    
+    });
+};
+
+databaseEngine.add_friend = function(data, socket) {
+    userDB.findOne({username: socket.username}, function (err, user) {
+        var alreadyAdded = false;
+        console.log(user.friends.length);
+        for(var i = 0; i < user.friends.length; i++){
+            console.log('a');
+            if(user.friends[i].username == data.friendName){
+                alreadyAdded = true;
+                console.log('friend aldready added');
+            }
+        }
+        if(!alreadyAdded){
+           userDB.findOne({username: data.friendName}, function (err,foundFriend){
+                if(err){
+                    console.error(err);
+                }else if(!foundFriend){
+                    console.log("friend not found");
+                }else{
+                    user.friends.push({name: foundFriend.username});    
+                    user.save(function(err, user){
+                        console.log("friend added:" + foundFriend.username);
+                    });
+                    for(var i = 0; i < user.friends.length;i++){
+                        console.log(user.friends[i].name);
+                    }
+                }
+            });
+        }
     });
 };
