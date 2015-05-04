@@ -22,8 +22,6 @@ var game_core = function(game_instance){
 
     //Start a fast paced timer for measuring time easier
     this.create_timer();
-
-       
     this.server_time = 0;
     this.laststate = {};
 };
@@ -76,7 +74,7 @@ game_core.prototype.handle_server_input = function(client, message){
     this.updateRequired = true;
 };
 
-game_core.prototype.verifyData = function(good, fuckingBad) {
+game_core.prototype.verifyData = function( good , fuckingBad) {
     good.unitCount = fuckingBad.unitCount;
     good.buildingCount = fuckingBad.buildingCount;
     fuckingBad.buildings.forEach(function(item) {
@@ -96,7 +94,7 @@ game_core.prototype.verifyData = function(good, fuckingBad) {
             });
         }
     });
-
+    good.castleHp = fuckingBad.castleHp;
     // fuckingBad.units.forEach(function(item) {
     //     if(!item.old){
     //         item.old = true;
@@ -150,8 +148,8 @@ game_core.prototype.server_update = function(){
     //Update the state of our local clock to match the timer
     this.server_time = this.local_time;
 
-    this.hostData = {money: 5, buildings: [], units: [], buildingCount: 0, unitCount: 0};
-    this.guestData = {money: 5, buildings: [], units: [], buildingCount: 0, unitCount: 0};
+    this.hostData = {money: 5, castleHp: 1000, buildings: [], units: [], buildingCount: 0, unitCount: 0};
+    this.guestData = {money: 5, castleHp: 1000, buildings: [], units: [], buildingCount: 0, unitCount: 0};
     this.moneyUpdateTimer = 0;
     //Make a snapshot of the current state, for updating the clients
     // this.laststate = {
