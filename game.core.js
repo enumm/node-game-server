@@ -1,5 +1,4 @@
 var game_core = function(game_instance){
-
     //Store the instance, if any
     this.instance = game_instance;
 
@@ -40,16 +39,11 @@ var game_player = function( game_instance, player_instance ) {
 };
 
 game_core.prototype.update = function(t) {
-    
     //Work out the delta time
     this.dt = this.lastframetime ? ( (t - this.lastframetime)/1000.0).fixed() : 0.016;
-        //Store the last frame time
     this.lastframetime = t;
-    //Update the game specifics
     this.server_update();
-    //schedule the next update
-    //this.updateid = window.requestAnimationFrame( this.update.bind(this), this.viewport );
-}; //game_core.update
+};
 
 game_core.prototype.create_timer = function(){
     setInterval(function(){
@@ -57,70 +51,7 @@ game_core.prototype.create_timer = function(){
         this._dte = new Date().getTime();
         this.local_time += this._dt/1000.0;
     }.bind(this), 4);
-}
-
-game_core.prototype.handle_server_input = function(client, message){
-    if(client.hosting){
-        this.verifyData(this.hostData, message);
-        //if(this.verifyData(this.hostData, message)){
-            //console.log('<<-----setting host data ' + message.buildings.length);
-            //this.hostData  = message;
-        //}
-    }else{
-        //if(this.verifyData(this.guestData, message)){
-            this.verifyData(this.guestData, message);
-            //console.log('<<-----setting guest data ' + message.buildings.length);
-            //this.guestData  = message;
-        //}
-    }
-
-    this.updateRequired = true;
 };
-
-
-
-
-
-
-
-game_core.prototype.verifyData = function( good , fuckingBad) {
-    //change
-    good.unitCount = fuckingBad.unitCount;
-    //good.buildingCount = fuckingBad.buildingCount;
-
-    fuckingBad.buildings.forEach(function(item) {
-        if(!item.old){
-            if(fuckingBad.money >= c.BuildingTypes[item.buildingType.name].cost && good.money >= c.BuildingTypes[item.buildingType.name].cost){
-                item.old = true;
-                item.productionTimer = 0;
-                item.hp = c.BuildingTypes[item.buildingType.name].life;
-                item.buildingType = c.BuildingTypes[item.buildingType.name];
-                good.buildings.push(item);
-                good.buildingCount++;
-                fuckingBad.money -= c.BuildingTypes[item.buildingType.name].cost;
-                good.money -= c.BuildingTypes[item.buildingType.name].cost;
-            }
-        }
-        good.buildings.forEach(function(el){
-            if(el.name == item.name){
-                el.kill = item.kill;
-                el.producing = item.producing;
-            }
-        });
-    });
-
-    good.castleHp = fuckingBad.castleHp;
-    
-    //change
-    good.units = fuckingBad.units;
-};
-
-
-
-
-
-
-
 
 game_core.prototype.create_physics_simulation = function() {
     setInterval(function(){
@@ -132,11 +63,80 @@ game_core.prototype.create_physics_simulation = function() {
     }.bind(this), 15);
 };
 
+game_core.prototype.server_update = function(){
+    this.server_time = this.local_time;
+
+    this.hostData = {money: 5, castleHp: 1000, buildings: [], units: [], buildingCount: 0, unitCount: 0};
+    this.guestData = {money: 5, castleHp: 1000, buildings: [], units: [], buildingCount: 0, unitCount: 0};
+    this.moneyUpdateTimer = 0;
+
+    if(this.players.self) {
+        this.players.self.emit('hello', {msg:'Starting server game loop'});
+    }
+
+    if(this.players.other) {
+        this.players.other.emit('hello', {msg:'Starting server game loop'});
+    }
+
+    this.started = true;
+};
+
+game_core.prototype.handle_server_input = function(client, message){
+    if(client.hosting){
+        this.verifyData(this.hostData, message);
+    }else{
+        this.verifyData(this.guestData, message);
+    }
+
+    this.updateRequired = true;
+};
+
+
+
+
+
+
+
+
+
+game_core.prototype.verifyData = function( ourData , clientData) {
+    clientData.buildings.forEach(function(item) {
+        if(!item.old){
+            if(c.BuildingTypes[item.buildingType]){
+                if(clientData.money >= c.BuildingTypes[item.buildingType].cost && ourData.money >= c.BuildingTypes[item.buildingType].cost){
+                    item.old = true;
+                    item.productionTimer = 0;
+                    item.hp = c.BuildingTypes[item.buildingType].life;
+                    //item.unitType = c.BuildingTypes[item.buildingType].unitType;
+                    
+                    ourData.buildings.push(item);
+                    ourData.buildingCount++;
+                    clientData.money -= c.BuildingTypes[item.buildingType].cost;
+                    ourData.money -= c.BuildingTypes[item.buildingType].cost;
+                }
+            }
+        }
+        ourData.buildings.forEach(function(el){
+            if(el.name == item.name){
+                el.kill = item.kill;
+                el.producing = item.producing;
+            }
+        });
+    });
+};
+
+
+
+
+
+
 game_core.prototype.update_physics = function() {
-    var delta =  this._pdt;
+    var outer = this;
     var sendmsg = false;
+
     //simple money update 
-    this.moneyUpdateTimer +=  delta;
+    this.moneyUpdateTimer +=   this._pdt;
+
     if(this.moneyUpdateTimer >= 10)
     {
         this.hostData.money += 5;
@@ -145,37 +145,48 @@ game_core.prototype.update_physics = function() {
     }
 
     //building units update
-    this.hostData.buildings.forEach(function(el){
-        if(el.producing && !el.kill){
-            el.productionTimer += delta;
+    // this.hostData.buildings.forEach(function(el){
+    //     if(el.producing && !el.kill){
+    //         el.productionTimer +=  outer._pdt;
 
-            if(el.productionTimer >= el.buildingType.buildTime){
-                el.productionTimer = 0;
-                sendmsg = true;
-            }
-        }else{
-            el.productionTimer = 0;
-        }
-    });
+    //         if(el.productionTimer >= el.buildingType.buildTime){
+    //             el.productionTimer = 0;
+    //             sendmsg = true;
+                
+    //             outer.hostData.units.push({name: 'hunit' + outer.hostData.unitCount});
+    //             outer.hostData.unitCount++;
+    //         }
+    //     }else{
+    //         el.productionTimer = 0;
+    //     }
+    // });
 
-    if(sendmsg){
-        if(this.players.self) {
-            this.players.self.emit('hello', {msg:'unit + 1'});
-        } 
-    }
+    // this.guestData.buildings.forEach(function(el){
+    //     if(el.producing && !el.kill){
+    //         el.productionTimer += delta;
+
+    //         if(el.productionTimer >= el.buildingType.buildTime){
+    //             el.productionTimer = 0;
+    //             sendmsg = true;
+
+    //             outer.guestData.units.push({name: 'hunit' + outer.guestData.unitCount});
+    //             outer.guestData.unitCount++;
+    //         }
+    //     }else{
+    //         el.productionTimer = 0;
+    //     }
+    // });
 
     //send data 
-    if(this.updateRequired){
+    if(this.updateRequired || sendmsg){
         
         //Send the snapshot to the 'host' player
         if(this.players.self) {
-            //console.log('--->sending host data ' + this.hostData.buildings.length);
             this.players.self.emit('message', this.hostData, this.guestData);
         }
 
         //Send the snapshot to the 'client' player
         if(this.players.other) {
-            //console.log('--->sending guest data ' + this.guestData.buildings.length);
             this.players.other.emit('message', this.guestData, this.hostData);
         }
 
@@ -183,32 +194,3 @@ game_core.prototype.update_physics = function() {
     }
 };
 
-game_core.prototype.server_update = function(){
-
-    //Update the state of our local clock to match the timer
-    this.server_time = this.local_time;
-
-    this.hostData = {money: 5, castleHp: 1000, buildings: [], units: [], buildingCount: 0, unitCount: 0};
-    this.guestData = {money: 5, castleHp: 1000, buildings: [], units: [], buildingCount: 0, unitCount: 0};
-    this.moneyUpdateTimer = 0;
-    //Make a snapshot of the current state, for updating the clients
-    // this.laststate = {
-    //     hp  : this.players.self.pos,                //'host position', the game creators position
-    //     cp  : this.players.other.pos,               //'client position', the person that joined, their position
-    //     his : this.players.self.last_input_seq,     //'host input sequence', the last input we processed for the host
-    //     cis : this.players.other.last_input_seq,    //'client input sequence', the last input we processed for the client
-    //     t   : this.server_time                      // our current local time on the server
-    // };
-
-        //Send the snapshot to the 'host' player
-    if(this.players.self) {
-        this.players.self.emit('hello', {msg:'Starting server game loop'});
-    }
-
-        //Send the snapshot to the 'client' player
-    if(this.players.other) {
-        this.players.other.emit('hello', {msg:'Starting server game loop'});
-    }
-
-    this.started = true;
-}; //game_core.server_update
