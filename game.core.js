@@ -69,6 +69,7 @@ game_core.prototype.server_update = function(){
     this.hostData = {money: 5, castleHp: 1000, buildings: [], units: [], buildingCount: 0, unitCount: 0};
     this.guestData = {money: 5, castleHp: 1000, buildings: [], units: [], buildingCount: 0, unitCount: 0};
     this.moneyUpdateTimer = 0;
+    this.clientUpdateTimer = 0;
 
     if(this.players.self) {
         this.players.self.emit('hello', {msg:'Starting server game loop'});
@@ -128,43 +129,70 @@ game_core.prototype.verifyData = function( ourData , clientData) {
 };
 
 
-game_core.prototype.addUnit = function(host, buildingType){
+game_core.prototype.addUnit = function(host, el){
     // this.players.self.emit('hello', {msg:'adding unit: ' + c.BuildingTypes[buildingType].unitType});
 
-    // var tilePos = assets.screenToMap(this.x, this.y);
-    //         var unitTilePos = assets.getFreeTilePOS(tilePos[0], tilePos[1], gameInstanceScreen.connectionData.host, this.ours);
-    //         if(unitTilePos){
-    //             var unitPos = assets.mapToScreen(unitTilePos[0], unitTilePos[1]);
+    var tilePos = this.screenToMap(el.x, el.y);
+    var unitTilePos = this.getFreeTilePOS(tilePos[0], tilePos[1], host);
 
+    if(unitTilePos){
+        var unitPos = this.mapToScreen(unitTilePos[0], unitTilePos[1]);
 
-    // var unit = {
-    //     name: host ? 'hunit' + this.hostData.unitCount++: 'ounit' + this.guestData.unitCount++,
-    //     x: unitPos[0],
-    //     y: unitPos[1],
-    //     unitType: BuildingTypes[this.buildingType].unitType
-    // }
+        var unit = {
+            name: host ? 'hunit' + this.hostData.unitCount++: 'ounit' + this.guestData.unitCount++,
+            x: unitPos[0],
+            y: unitPos[1],
+            unitType: c.BuildingTypes[el.buildingType].unitType
+        }
 
+        host ? this.hostData.units.push(unit) : this.guestData.units.push(unit);
 
+    }
 };
-
-
-
 
 
 
 game_core.prototype.update_physics = function() {
     var outer = this;
     //simple money update 
-    this.moneyUpdateTimer +=   this._pdt;
+    this.moneyUpdateTimer += this._pdt;
 
-    if(this.moneyUpdateTimer >= 10)
-    {
+    if(this.moneyUpdateTimer >= 10){
         this.hostData.money += 5;
         this.guestData.money += 5;
         this.moneyUpdateTimer  = 0;
     }
 
-    //building units update
+    //units update....
+
+    this.hostData.units.forEach(function(el){
+        el.x += 10 * this._pdt;
+    });
+    this.guestData.units.forEach(function(el){
+       el.x += 10 * this._pdt; 
+    });
+
+    //send data 
+    this.clientUpdateTimer += this._pdt;
+
+    if(this.updateRequired || this.clientUpdateTimer >= 1){
+        
+        //Send the snapshot to the 'host' player
+        if(this.players.self) {
+            this.players.self.emit('message', this.hostData, this.guestData);
+        }
+
+        //Send the snapshot to the 'client' player
+        if(this.players.other) {
+            this.players.other.emit('message', this.guestData, this.hostData);
+        }
+
+
+        this.clientUpdateTimer = 0;
+        this.updateRequired = false;
+    }
+
+    //building units building
     this.hostData.buildings.forEach(function(el){
         if(el.producing && !el.kill){
             el.productionTimer +=  outer._pdt;
@@ -190,23 +218,8 @@ game_core.prototype.update_physics = function() {
             el.productionTimer = 0;
         }
     });
-
-    //send data 
-    if(this.updateRequired){
-        
-        //Send the snapshot to the 'host' player
-        if(this.players.self) {
-            this.players.self.emit('message', this.hostData, this.guestData);
-        }
-
-        //Send the snapshot to the 'client' player
-        if(this.players.other) {
-            this.players.other.emit('message', this.guestData, this.hostData);
-        }
-
-        this.updateRequired = false;
-    }
 };
+
 
 
 
@@ -224,7 +237,7 @@ game_core.prototype.screenToMap = function(x, y ){
 };
 
 game_core.prototype.getFreeTilePOS =  function(tX, tY, host){
-    var matrix = assets.getMapMatrix(host);
+    var matrix = this.getMapMatrix(host);
     //todo: review possitions...
     if(host){
         if(matrix[tY][tX + 1] == 0) return [tX + 1, tY];
@@ -241,7 +254,7 @@ game_core.prototype.getFreeTilePOS =  function(tX, tY, host){
     return null;
 };
 
-o.getMapMatrix = function(host){
+game_core.prototype.getMapMatrix = function(host){
     var mapMatrix = [
     [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
     [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
@@ -293,12 +306,12 @@ o.getMapMatrix = function(host){
     
     if(host){
         for (var i = 0, len = this.hostData.buildings.length; i < len; i++) {
-            var pos = assets.screenToMap(this.hostData.buildings[i].x, this.hostData.buildings[i].y);
+            var pos = this.screenToMap(this.hostData.buildings[i].x, this.hostData.buildings[i].y);
             mapMatrix[pos[1]][pos[0]] = 1; 
         }
     }else{
         for (var i = 0, len = this.guestData.buildings.length; i < len; i++) {
-            var pos = assets.screenToMap(this.guestData.buildings[i].x, this.guestData.buildings[i].y);
+            var pos = this.screenToMap(this.guestData.buildings[i].x, this.guestData.buildings[i].y);
             mapMatrix[pos[1]][pos[0]] = 1; 
         }
     }
