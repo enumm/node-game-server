@@ -166,10 +166,10 @@ game_core.prototype.update_physics = function() {
     //units update....
 
     this.hostData.units.forEach(function(el){
-        el.x += 10 * this._pdt;
+        el.x += 10 * outer._pdt;
     });
     this.guestData.units.forEach(function(el){
-       el.x += 10 * this._pdt; 
+       el.x += 10 * outer._pdt; 
     });
 
     //send data 
