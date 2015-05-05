@@ -97,8 +97,6 @@ game_core.prototype.handle_server_input = function(client, message){
 
 
 
-
-
 game_core.prototype.verifyData = function( ourData , clientData) {
     clientData.buildings.forEach(function(item) {
         if(!item.old){
@@ -118,6 +116,10 @@ game_core.prototype.verifyData = function( ourData , clientData) {
         }
         ourData.buildings.forEach(function(el){
             if(el.name == item.name){
+                if(item.kill && item.sell){
+                    ourData.money += c.BuildingTypes[item.buildingType].cost/2;
+                }
+
                 el.kill = item.kill;
                 el.producing = item.producing;
             }
