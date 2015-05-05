@@ -128,14 +128,32 @@ game_core.prototype.verifyData = function( ourData , clientData) {
 };
 
 
+game_core.prototype.addUnit = function(host, buildingType){
+    // this.players.self.emit('hello', {msg:'adding unit: ' + c.BuildingTypes[buildingType].unitType});
+
+    // var tilePos = assets.screenToMap(this.x, this.y);
+    //         var unitTilePos = assets.getFreeTilePOS(tilePos[0], tilePos[1], gameInstanceScreen.connectionData.host, this.ours);
+    //         if(unitTilePos){
+    //             var unitPos = assets.mapToScreen(unitTilePos[0], unitTilePos[1]);
+
+
+    // var unit = {
+    //     name: host ? 'hunit' + this.hostData.unitCount++: 'ounit' + this.guestData.unitCount++,
+    //     x: unitPos[0],
+    //     y: unitPos[1],
+    //     unitType: BuildingTypes[this.buildingType].unitType
+    // }
+
+
+};
+
+
 
 
 
 
 game_core.prototype.update_physics = function() {
     var outer = this;
-    var sendmsg = false;
-
     //simple money update 
     this.moneyUpdateTimer +=   this._pdt;
 
@@ -147,40 +165,34 @@ game_core.prototype.update_physics = function() {
     }
 
     //building units update
-    // this.hostData.buildings.forEach(function(el){
-    //     if(el.producing && !el.kill){
-    //         el.productionTimer +=  outer._pdt;
+    this.hostData.buildings.forEach(function(el){
+        if(el.producing && !el.kill){
+            el.productionTimer +=  outer._pdt;
 
-    //         if(el.productionTimer >= el.buildingType.buildTime){
-    //             el.productionTimer = 0;
-    //             sendmsg = true;
-                
-    //             outer.hostData.units.push({name: 'hunit' + outer.hostData.unitCount});
-    //             outer.hostData.unitCount++;
-    //         }
-    //     }else{
-    //         el.productionTimer = 0;
-    //     }
-    // });
+            if(el.productionTimer >= c.BuildingTypes[el.buildingType].buildTime){
+                el.productionTimer = 0;
+                outer.addUnit(true, el);
+            }
+        }else{
+            el.productionTimer = 0;
+        }
+    });
 
-    // this.guestData.buildings.forEach(function(el){
-    //     if(el.producing && !el.kill){
-    //         el.productionTimer += delta;
+    this.guestData.buildings.forEach(function(el){
+        if(el.producing && !el.kill){
+            el.productionTimer +=  outer._pdt;
 
-    //         if(el.productionTimer >= el.buildingType.buildTime){
-    //             el.productionTimer = 0;
-    //             sendmsg = true;
-
-    //             outer.guestData.units.push({name: 'hunit' + outer.guestData.unitCount});
-    //             outer.guestData.unitCount++;
-    //         }
-    //     }else{
-    //         el.productionTimer = 0;
-    //     }
-    // });
+            if(el.productionTimer >= c.BuildingTypes[el.buildingType].buildTime){
+                el.productionTimer = 0;
+                outer.addUnit(false, el);
+            }
+        }else{
+            el.productionTimer = 0;
+        }
+    });
 
     //send data 
-    if(this.updateRequired || sendmsg){
+    if(this.updateRequired){
         
         //Send the snapshot to the 'host' player
         if(this.players.self) {
@@ -196,3 +208,100 @@ game_core.prototype.update_physics = function() {
     }
 };
 
+
+
+//tile height 64
+//tilewidth 128
+//helper functions
+game_core.prototype.mapToScreen = function(x, y ){
+    return [x * 64 - y * 64, y * 32 + x * 32];
+};
+
+game_core.prototype.screenToMap = function(x, y ){
+    mapx = (x / 128 + y / 64);
+    mapy = (y / 64 - (x / 128));
+    return([mapx, mapy])
+};
+
+game_core.prototype.getFreeTilePOS =  function(tX, tY, host){
+    var matrix = assets.getMapMatrix(host);
+    //todo: review possitions...
+    if(host){
+        if(matrix[tY][tX + 1] == 0) return [tX + 1, tY];
+        if(matrix[tY -1][tX] == 0) return [tX, tY - 1];
+        if(matrix[tY + 1][tX] == 0) return [tX, tY + 1];
+        if(matrix[tY][tX - 1] == 0) return [tX - 1, tY];    
+    }else{
+        if(matrix[tY + 1][tX] == 0) return [tX, tY + 1];
+        if(matrix[tY][tX - 1] == 0) return [tX - 1, tY];
+        if(matrix[tY][tX + 1] == 0) return [tX + 1, tY];
+        if(matrix[tY -1 ][tX] == 0) return [tX, tY - 1];   
+    }
+    
+    return null;
+};
+
+o.getMapMatrix = function(host){
+    var mapMatrix = [
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0],
+    [0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0],
+    [0,0,0,0,0,0,0,1,1,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0],
+    [0,0,0,0,0,0,1,1,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,1,0,0,0,0,0],
+    [0,0,0,0,0,1,1,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,1,1,0,0,0,0,0,0],
+    [0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,1,1,0,0,0,0,0,0,0],
+    [0,0,0,1,1,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0],
+    [0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+    ];
+    
+    if(host){
+        for (var i = 0, len = this.hostData.buildings.length; i < len; i++) {
+            var pos = assets.screenToMap(this.hostData.buildings[i].x, this.hostData.buildings[i].y);
+            mapMatrix[pos[1]][pos[0]] = 1; 
+        }
+    }else{
+        for (var i = 0, len = this.guestData.buildings.length; i < len; i++) {
+            var pos = assets.screenToMap(this.guestData.buildings[i].x, this.guestData.buildings[i].y);
+            mapMatrix[pos[1]][pos[0]] = 1; 
+        }
+    }
+
+    return mapMatrix;
+};
