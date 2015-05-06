@@ -135,8 +135,6 @@ game_core.prototype.verifyData = function( ourData , clientData) {
 
 
 game_core.prototype.addUnit = function(host, el){
-    // this.players.self.emit('hello', {msg:'adding unit: ' + c.BuildingTypes[buildingType].unitType});
-
     var tilePos = this.screenToMap(el.x, el.y);
     var unitTilePos = this.getFreeTilePOS(tilePos[0], tilePos[1], host);
 
@@ -156,10 +154,42 @@ game_core.prototype.addUnit = function(host, el){
     }
 };
 
+game_core.prototype.updateUnit = function(el){
+    //el.x += 10 * this._pdt;
+
+    if(el.path.length != 0){
+        var mapPositionToGo = el.path[0];
+        var positionToGo = this.mapToScreen(mapPositionToGo[0], mapPositionToGo[1]);
+
+        var dx = positionToGo[0]-el.x;
+        var dy = positionToGo[1]-el.y;
+
+        var length = Math.sqrt(dx*dx+dy*dy);
+
+        if(length != 0 ){
+            dx/=length;
+            dy/=length;
+
+
+            dx *= 60 * this._pdt;
+            dy *= 60 * this._pdt;
+
+            el.x += dx;
+            el.y += dy;
+        }
+
+        //console.log('skirtumas x: ' +(this.x -  positionToGo[0]) + ' y: ' + (this.y - positionToGo[1]));
+        if(el.x - positionToGo[0] < 1 && el.x - positionToGo[0] > - 1 && el.y - positionToGo[1] < 1 && el.y - positionToGo[1] > -1){
+            el.path.shift();
+        }
+    }
+};
+
 
 
 game_core.prototype.update_physics = function() {
     var outer = this;
+
     //simple money update 
     this.moneyUpdateTimer += this._pdt;
 
@@ -170,12 +200,12 @@ game_core.prototype.update_physics = function() {
     }
 
     //units update....
-
     this.hostData.units.forEach(function(el){
-        el.x += 10 * outer._pdt;
+        outer.updateUnit(el);
     });
+
     this.guestData.units.forEach(function(el){
-       el.x += 10 * outer._pdt; 
+        outer.updateUnit(el);
     });
 
     //send data 
@@ -197,7 +227,7 @@ game_core.prototype.update_physics = function() {
         this.updateRequired = false;
     }
 
-    //building units building
+    //building units
     this.hostData.buildings.forEach(function(el){
         if(el.producing && !el.kill){
             el.productionTimer +=  outer._pdt;
