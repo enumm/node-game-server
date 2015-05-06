@@ -16,6 +16,11 @@ var game_core = function(game_instance){
     this._dte = new Date().getTime();   //The local timer last frame time
     
     c = require('./constants');
+    PF = require('pathfinding');
+
+    this.finder = new PF.AStarFinder({
+        allowDiagonal: true
+    });
 
     //Start a physics loop, this is separate to the rendering
     //as this happens at a fixed frequency
@@ -137,16 +142,17 @@ game_core.prototype.addUnit = function(host, el){
 
     if(unitTilePos){
         var unitPos = this.mapToScreen(unitTilePos[0], unitTilePos[1]);
-
+        
         var unit = {
             name: host ? 'hunit' + this.hostData.unitCount++: 'ounit' + this.guestData.unitCount++,
+            hp: c.UnitTypes[c.BuildingTypes[el.buildingType].unitType].life,
             x: unitPos[0],
             y: unitPos[1],
-            unitType: c.BuildingTypes[el.buildingType].unitType
+            unitType: c.BuildingTypes[el.buildingType].unitType,
+            path: this.getPath(unitTilePos[0], unitTilePos[1], host)
         }
 
         host ? this.hostData.units.push(unit) : this.guestData.units.push(unit);
-
     }
 };
 
@@ -186,7 +192,6 @@ game_core.prototype.update_physics = function() {
         if(this.players.other) {
             this.players.other.emit('message', this.guestData, this.hostData);
         }
-
 
         this.clientUpdateTimer = 0;
         this.updateRequired = false;
@@ -317,4 +322,19 @@ game_core.prototype.getMapMatrix = function(host){
     }
 
     return mapMatrix;
+};
+
+game_core.prototype.getPath = function(tx, ty, host){
+    var walkPath = [];
+
+    var grid;
+    if(host){
+        grid = new PF.Grid(this.getMapMatrix(true));
+        walkPath = this.finder.findPath(Math.ceil(tx), Math.ceil(ty), 31, 14, grid);
+    }else{
+        grid = new PF.Grid(this.getMapMatrix());
+        walkPath = this.finder.findPath(Math.ceil(tx), Math.ceil(ty), 14, 31, grid);  
+    }
+
+    return walkPath;
 };

@@ -9,8 +9,8 @@ exports.DataBase = {
 };
 
 exports.UnitTypes = {
-    Pleb: {name: 'Pleb', type: 'ground', damage: 10, armor: 10, movementSpeed: 60},
-    RangedPleb: {name: 'RangedPleb', type: 'ranged', damage: 8, armor: 5, movementSpeed: 60}
+    Pleb: {name: 'Pleb', type: 'ground', damage: 10, armor: 10, movementSpeed: 60, life: 100},
+    RangedPleb: {name: 'RangedPleb', type: 'ranged', damage: 8, armor: 5, movementSpeed: 60, life: 100}
 };
 
 exports.BuildingTypes = {
