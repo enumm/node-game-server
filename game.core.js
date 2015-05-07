@@ -154,33 +154,83 @@ game_core.prototype.addUnit = function(host, el){
     }
 };
 
-game_core.prototype.updateUnit = function(el){
-    //el.x += 10 * this._pdt;
+game_core.prototype.updateUnit = function(el, host){
+    var distanceToEnemy = 100000;
+    var enemy;
+    var outer = this;
 
-    if(el.path.length != 0){
-        var mapPositionToGo = el.path[0];
-        var positionToGo = this.mapToScreen(mapPositionToGo[0], mapPositionToGo[1]);
+    if(host){
+        this.guestData.units.concat(this.guestData.buildings).forEach(function(value){   
+            if(!value.kill){
+                var dst = outer.getDistance(el.x, el.y, value.x, value.y);
+                if(distanceToEnemy > dst){
+                    distanceToEnemy = dst;
+                    enemy = value; 
+                } 
+            }
+        });
+    }else{
+        this.hostData.units.concat(this.hostData.buildings).forEach(function(value){
+            if(!value.kill){
+                var dst = outer.getDistance(el.x, el.y, value.x, value.y);
+                if(distanceToEnemy > dst){
+                    distanceToEnemy = dst;
+                    enemy = value; 
+                } 
+            }
+        });
+    }
 
-        var dx = positionToGo[0]-el.x;
-        var dy = positionToGo[1]-el.y;
+    if(distanceToEnemy < 200){
+        if(enemy){
+            if(distanceToEnemy < c.UnitTypes[el.unitType].range){
+                //fight
+            }else{
+                //walk to enemy
+                var dx = enemy.x - el.x;
+                var dy = enemy.y - el.y;
 
-        var length = Math.sqrt(dx*dx+dy*dy);
+                var length = Math.sqrt(dx*dx+dy*dy);
 
-        if(length != 0 ){
-            dx/=length;
-            dy/=length;
+                if(length != 0 ){
+                    dx/=length;
+                    dy/=length;
 
 
-            dx *= 60 * this._pdt;
-            dy *= 60 * this._pdt;
+                    dx *= c.UnitTypes[el.unitType].movementSpeed * this._pdt;
+                    dy *= c.UnitTypes[el.unitType].movementSpeed * this._pdt;
 
-            el.x += dx;
-            el.y += dy;
+                    el.x += dx;
+                    el.y += dy;
+                 }
+            }
         }
+    }else{
+        if(el.path.length != 0){
+            var mapPositionToGo = el.path[0];
+            var positionToGo = this.mapToScreen(mapPositionToGo[0], mapPositionToGo[1]);
 
-        //console.log('skirtumas x: ' +(this.x -  positionToGo[0]) + ' y: ' + (this.y - positionToGo[1]));
-        if(el.x - positionToGo[0] < 1 && el.x - positionToGo[0] > - 1 && el.y - positionToGo[1] < 1 && el.y - positionToGo[1] > -1){
-            el.path.shift();
+            var dx = positionToGo[0]-el.x;
+            var dy = positionToGo[1]-el.y;
+
+            var length = Math.sqrt(dx*dx+dy*dy);
+
+            if(length != 0 ){
+                dx/=length;
+                dy/=length;
+
+
+                dx *= c.UnitTypes[el.unitType].movementSpeed * this._pdt;
+                dy *= c.UnitTypes[el.unitType].movementSpeed * this._pdt;
+
+                el.x += dx;
+                el.y += dy;
+            }
+
+            //console.log('skirtumas x: ' +(this.x -  positionToGo[0]) + ' y: ' + (this.y - positionToGo[1]));
+            if(el.x - positionToGo[0] < 1 && el.x - positionToGo[0] > - 1 && el.y - positionToGo[1] < 1 && el.y - positionToGo[1] > -1){
+                el.path.shift();
+            }
         }
     }
 };
@@ -201,11 +251,11 @@ game_core.prototype.update_physics = function() {
 
     //units update....
     this.hostData.units.forEach(function(el){
-        outer.updateUnit(el);
+        outer.updateUnit(el, true);
     });
 
     this.guestData.units.forEach(function(el){
-        outer.updateUnit(el);
+        outer.updateUnit(el, false);
     });
 
     //send data 
@@ -367,4 +417,18 @@ game_core.prototype.getPath = function(tx, ty, host){
     }
 
     return walkPath;
+};
+
+game_core.prototype.getDistance = function(x1, y1, x2, y2)
+{
+    var xs = 0;
+    var ys = 0;
+
+    xs = x2 - x1;
+    xs = xs * xs;
+
+    ys = y2 - y1;
+    ys = ys * ys;
+
+    return Math.sqrt( xs + ys );
 };
