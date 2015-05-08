@@ -131,33 +131,6 @@ lobby.endGame = function(gameid, username) {
                 //stop the game updates immediate
             //thegame.gamecore.stop_update();
 
-                //if the game has two players, the one is leaving
-            if(thegame.player_count > 1) {
-
-                //     //send the players the message the game is ending
-                // if(userid == thegame.player_host.userid) {
-
-                //         //the host left, oh snap. Lets try join another game
-                //     if(thegame.player_client) {
-                //             //tell them the game is over
-                //         thegame.player_client.send('s.e');
-                //             //now look for/create a new game.
-                //         this.findGame(thegame.player_client);
-                //     }
-                    
-                // } else {
-                //         //the other player left, we were hosting
-                //     if(thegame.player_host) {
-                //             //tell the client the game is ended
-                //         thegame.player_host.send('s.e');
-                //             //i am no longer hosting, this game is going down
-                //         thegame.player_host.hosting = false;
-                //             //now look for/create a new game.
-                //         this.findGame(thegame.player_host);
-                //     }
-                // }
-            }
-
             if(thegame.player_host){
                 delete thegame.player_host.game;
                 thegame.player_host.game = null;
@@ -169,6 +142,8 @@ lobby.endGame = function(gameid, username) {
                 thegame.player_client.game = null;
                 thegame.player_client.emit('game_ended', {msg: 'Game ended, player: "' + username + '" disconected'})
             }
+
+            thegame.gamecore.sopAndDestroy();
 
             thegame.gamecore.players.other = null;
             thegame.gamecore.players.self = null;

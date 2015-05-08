@@ -50,8 +50,23 @@ game_core.prototype.update = function(t) {
     this.server_update();
 };
 
+game_core.prototype.sopAndDestroy = function() {
+
+    clearInterval(this.timeIntervalId);
+    clearInterval(this.physicsIntervalId);
+
+    this.hostData = null;
+    delete this.hostData;
+    this.clientData = null;
+    delete this.clientData;
+    this.c = null;
+    delete this.c;
+    this.PF = null;
+    delete this.PF;
+};
+
 game_core.prototype.create_timer = function(){
-    setInterval(function(){
+    this.timeIntervalId =setInterval(function(){
         this._dt = new Date().getTime() - this._dte;
         this._dte = new Date().getTime();
         this.local_time += this._dt/1000.0;
@@ -59,7 +74,7 @@ game_core.prototype.create_timer = function(){
 };
 
 game_core.prototype.create_physics_simulation = function() {
-    setInterval(function(){
+    this.physicsIntervalId = setInterval(function(){
         this._pdt = (new Date().getTime() - this._pdte)/1000.0;
         this._pdte = new Date().getTime();
         if(this.started){
@@ -287,6 +302,7 @@ game_core.prototype.update_physics = function() {
             if(el.productionTimer >= outer.c.BuildingTypes[el.buildingType].buildTime){
                 el.productionTimer = 0;
                 outer.addUnit(true, el);
+                console.log('adding unit');
             }
         }else{
             el.productionTimer = 0;
@@ -300,6 +316,7 @@ game_core.prototype.update_physics = function() {
             if(el.productionTimer >= outer.c.BuildingTypes[el.buildingType].buildTime){
                 el.productionTimer = 0;
                 outer.addUnit(false, el);
+                console.log('adding unit');
             }
         }else{
             el.productionTimer = 0;
