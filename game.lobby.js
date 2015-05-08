@@ -29,8 +29,8 @@ lobby.startGame = function(game) {
     // game.player_host.emit('notification', {message: 'joined a game with: ' + game.player_client.username });
     // game.player_client.emit('notification', {message: 'joined a game with: ' + game.player_host.username });
 
-    game.player_host.emit('game_starting', {opponent: game.player_client.username, host: true });
-    game.player_client.emit('game_starting', {opponent: game.player_host.username, host: false });
+    game.player_host.emit('game_starting', {opponent: game.player_client.username, host: true, enemyRace: game.player_client.race});
+    game.player_client.emit('game_starting', {opponent: game.player_host.username, host: false, enemyRace: game.player_host.race});
     
     game.player_client.game = game;
     game.gamecore.update( new Date().getTime() );

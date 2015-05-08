@@ -55,14 +55,14 @@ game_core.prototype.sopAndDestroy = function() {
     clearInterval(this.timeIntervalId);
     clearInterval(this.physicsIntervalId);
 
-    this.hostData = null;
-    delete this.hostData;
-    this.clientData = null;
-    delete this.clientData;
-    this.c = null;
-    delete this.c;
-    this.PF = null;
-    delete this.PF;
+    // this.hostData = null;
+    // delete this.hostData;
+    // this.clientData = null;
+    // delete this.clientData;
+    // this.c = null;
+    // delete this.c;
+    // this.PF = null;
+    // delete this.PF;
 };
 
 game_core.prototype.create_timer = function(){
@@ -255,6 +255,7 @@ game_core.prototype.updateUnit = function(el, host){
 
 
 game_core.prototype.update_physics = function() {
+    //console.log(this._pdt);
     var outer = this;
 
     //simple money update 
@@ -302,7 +303,7 @@ game_core.prototype.update_physics = function() {
             if(el.productionTimer >= outer.c.BuildingTypes[el.buildingType].buildTime){
                 el.productionTimer = 0;
                 outer.addUnit(true, el);
-                console.log('adding unit');
+                // console.log('adding unit');
             }
         }else{
             el.productionTimer = 0;
