@@ -15,10 +15,10 @@ var game_core = function(game_instance){
     this._dt = new Date().getTime();    //The local timer delta
     this._dte = new Date().getTime();   //The local timer last frame time
     
-    c = require('./constants');
-    PF = require('pathfinding');
+    this.c = require('./constants');
+    this.PF = require('pathfinding');
 
-    this.finder = new PF.AStarFinder({
+    this.finder = new this.PF.AStarFinder({
         allowDiagonal: true
     });
 
@@ -104,6 +104,8 @@ game_core.prototype.handle_server_input = function(client, message){
 
 
 game_core.prototype.verifyData = function( ourData , clientData) {
+    var c = this.c;
+
     clientData.buildings.forEach(function(item) {
         if(!item.old){
             if(c.BuildingTypes[item.buildingType]){
@@ -143,10 +145,10 @@ game_core.prototype.addUnit = function(host, el){
         
         var unit = {
             name: host ? 'hunit' + this.hostData.unitCount++: 'ounit' + this.guestData.unitCount++,
-            hp: c.UnitTypes[c.BuildingTypes[el.buildingType].unitType].life,
+            hp: this.c.UnitTypes[this.c.BuildingTypes[el.buildingType].unitType].life,
             x: unitPos[0],
             y: unitPos[1],
-            unitType: c.BuildingTypes[el.buildingType].unitType,
+            unitType: this.c.BuildingTypes[el.buildingType].unitType,
             path: this.getPath(unitTilePos[0], unitTilePos[1], host)
         }
 
@@ -183,7 +185,7 @@ game_core.prototype.updateUnit = function(el, host){
 
     if(distanceToEnemy < 200){
         if(enemy){
-            if(distanceToEnemy < c.UnitTypes[el.unitType].range){
+            if(distanceToEnemy < this.c.UnitTypes[el.unitType].range){
                 //fight
             }else{
                 //walk to enemy
@@ -197,8 +199,8 @@ game_core.prototype.updateUnit = function(el, host){
                     dy/=length;
 
 
-                    dx *= c.UnitTypes[el.unitType].movementSpeed * this._pdt;
-                    dy *= c.UnitTypes[el.unitType].movementSpeed * this._pdt;
+                    dx *= this.c.UnitTypes[el.unitType].movementSpeed * this._pdt;
+                    dy *= this.c.UnitTypes[el.unitType].movementSpeed * this._pdt;
 
                     el.x += dx;
                     el.y += dy;
@@ -220,8 +222,8 @@ game_core.prototype.updateUnit = function(el, host){
                 dy/=length;
 
 
-                dx *= c.UnitTypes[el.unitType].movementSpeed * this._pdt;
-                dy *= c.UnitTypes[el.unitType].movementSpeed * this._pdt;
+                dx *= this.c.UnitTypes[el.unitType].movementSpeed * this._pdt;
+                dy *= this.c.UnitTypes[el.unitType].movementSpeed * this._pdt;
 
                 el.x += dx;
                 el.y += dy;
@@ -282,7 +284,7 @@ game_core.prototype.update_physics = function() {
         if(el.producing && !el.kill){
             el.productionTimer +=  outer._pdt;
 
-            if(el.productionTimer >= c.BuildingTypes[el.buildingType].buildTime){
+            if(el.productionTimer >= outer.c.BuildingTypes[el.buildingType].buildTime){
                 el.productionTimer = 0;
                 outer.addUnit(true, el);
             }
@@ -295,7 +297,7 @@ game_core.prototype.update_physics = function() {
         if(el.producing && !el.kill){
             el.productionTimer +=  outer._pdt;
 
-            if(el.productionTimer >= c.BuildingTypes[el.buildingType].buildTime){
+            if(el.productionTimer >= outer.c.BuildingTypes[el.buildingType].buildTime){
                 el.productionTimer = 0;
                 outer.addUnit(false, el);
             }
@@ -303,6 +305,14 @@ game_core.prototype.update_physics = function() {
             el.productionTimer = 0;
         }
     });
+
+    // if(this.players.self) {
+    //     this.players.self.emit('hello', {msg:'deltaTime: ' + this._pdt});
+    // }
+
+    // if(this.players.other) {
+    //     this.players.other.emit('hello', {msg:'deltaTime: ' + this._pdt});
+    // }
 };
 
 
@@ -409,10 +419,10 @@ game_core.prototype.getPath = function(tx, ty, host){
 
     var grid;
     if(host){
-        grid = new PF.Grid(this.getMapMatrix(true));
+        grid = new this.PF.Grid(this.getMapMatrix(true));
         walkPath = this.finder.findPath(Math.ceil(tx), Math.ceil(ty), 31, 14, grid);
     }else{
-        grid = new PF.Grid(this.getMapMatrix());
+        grid = new this.PF.Grid(this.getMapMatrix());
         walkPath = this.finder.findPath(Math.ceil(tx), Math.ceil(ty), 14, 31, grid);  
     }
 
