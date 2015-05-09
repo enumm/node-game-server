@@ -317,7 +317,7 @@ game_core.prototype.update_physics = function() {
             if(el.productionTimer >= outer.c.BuildingTypes[el.buildingType].buildTime){
                 el.productionTimer = 0;
                 outer.addUnit(false, el);
-                console.log('adding unit');
+                //console.log('adding unit');
             }
         }else{
             el.productionTimer = 0;
