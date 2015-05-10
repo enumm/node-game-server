@@ -209,7 +209,7 @@ game_core.prototype.updateUnit = function(el, host){
         });
     }
 
-    if(distanceToEnemy < 200){
+    if(distanceToEnemy < 130){
         if(enemy){
             if(distanceToEnemy < this.c.UnitTypes[el.unitType].range){
                 //fight
