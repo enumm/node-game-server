@@ -164,7 +164,8 @@ game_core.prototype.addUnit = function(host, el){
             x: unitPos[0],
             y: unitPos[1],
             unitType: this.c.BuildingTypes[el.buildingType].unitType,
-            path: this.getPath(unitTilePos[0], unitTilePos[1], host)
+            path: this.getPath(unitTilePos[0], unitTilePos[1], host),
+            attackTimer: 0
         }
 
         host ? this.hostData.units.push(unit) : this.guestData.units.push(unit);
@@ -176,20 +177,11 @@ game_core.prototype.updateUnit = function(el, host){
     var enemy;
     var outer = this;
 
-
-
-
     if(host){
         this.guestData.units.concat(this.guestData.buildings).forEach(function(value){   
             if(!value.kill){
-                if(outer.c.UnitTypes[el.unitType].type == 'ground'){
-                    if(value.unitType && outer.c.UnitTypes[value.unitType].type != 'flying'){
-                        var dst = outer.getDistance(el.x, el.y, value.x, value.y);
-                        if(distanceToEnemy > dst){
-                            distanceToEnemy = dst;
-                            enemy = value; 
-                        } 
-                    }
+                if(outer.c.UnitTypes[el.unitType].type == 'ground' && outer.c.UnitTypes[value.unitType] &&  outer.c.UnitTypes[value.unitType].type == 'flying'){
+                    
                 }
                 else{
                     var dst = outer.getDistance(el.x, el.y, value.x, value.y);
@@ -203,14 +195,8 @@ game_core.prototype.updateUnit = function(el, host){
     }else{
         this.hostData.units.concat(this.hostData.buildings).forEach(function(value){
             if(!value.kill){
-                 if(outer.c.UnitTypes[el.unitType].type == 'ground'){
-                    if(value.unitType && outer.c.UnitTypes[value.unitType].type != 'flying'){
-                        var dst = outer.getDistance(el.x, el.y, value.x, value.y);
-                        if(distanceToEnemy > dst){
-                            distanceToEnemy = dst;
-                            enemy = value; 
-                        } 
-                    }
+                if(outer.c.UnitTypes[el.unitType].type == 'ground' && outer.c.UnitTypes[value.unitType] &&  outer.c.UnitTypes[value.unitType].type == 'flying'){
+                    
                 }
                 else{
                     var dst = outer.getDistance(el.x, el.y, value.x, value.y);
@@ -227,6 +213,16 @@ game_core.prototype.updateUnit = function(el, host){
         if(enemy){
             if(distanceToEnemy < this.c.UnitTypes[el.unitType].range){
                 //fight
+                el.attackTimer += this._pdt;
+
+                if(el.attackTimer >= this.c.UnitTypes[el.unitType].attackSpeed){
+                    el.attackTimer = 0;
+                    enemy.hp -= this.c.UnitTypes[el.unitType].damage;
+
+                    if (enemy.hp <= 0) {
+                        enemy.kill = true;
+                    }
+                }
             }else{
                 //walk to enemy
                 var dx = enemy.x - el.x;
@@ -294,11 +290,15 @@ game_core.prototype.update_physics = function() {
 
     //units update....
     this.hostData.units.forEach(function(el){
-        outer.updateUnit(el, true);
+        if(!el.kill){
+            outer.updateUnit(el, true);
+        }
     });
 
     this.guestData.units.forEach(function(el){
-        outer.updateUnit(el, false);
+        if(!el.kill){
+            outer.updateUnit(el, false);
+        }
     });
 
     //send data 
