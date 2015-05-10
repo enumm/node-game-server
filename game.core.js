@@ -176,24 +176,49 @@ game_core.prototype.updateUnit = function(el, host){
     var enemy;
     var outer = this;
 
+
+
+
     if(host){
         this.guestData.units.concat(this.guestData.buildings).forEach(function(value){   
             if(!value.kill){
-                var dst = outer.getDistance(el.x, el.y, value.x, value.y);
-                if(distanceToEnemy > dst){
-                    distanceToEnemy = dst;
-                    enemy = value; 
-                } 
+                if(outer.c.UnitTypes[el.unitType].type == 'ground'){
+                    if(value.unitType && outer.c.UnitTypes[value.unitType].type != 'flying'){
+                        var dst = outer.getDistance(el.x, el.y, value.x, value.y);
+                        if(distanceToEnemy > dst){
+                            distanceToEnemy = dst;
+                            enemy = value; 
+                        } 
+                    }
+                }
+                else{
+                    var dst = outer.getDistance(el.x, el.y, value.x, value.y);
+                    if(distanceToEnemy > dst){
+                        distanceToEnemy = dst;
+                        enemy = value; 
+                    } 
+                }
             }
         });
     }else{
         this.hostData.units.concat(this.hostData.buildings).forEach(function(value){
             if(!value.kill){
-                var dst = outer.getDistance(el.x, el.y, value.x, value.y);
-                if(distanceToEnemy > dst){
-                    distanceToEnemy = dst;
-                    enemy = value; 
-                } 
+                 if(outer.c.UnitTypes[el.unitType].type == 'ground'){
+                    if(value.unitType && outer.c.UnitTypes[value.unitType].type != 'flying'){
+                        var dst = outer.getDistance(el.x, el.y, value.x, value.y);
+                        if(distanceToEnemy > dst){
+                            distanceToEnemy = dst;
+                            enemy = value; 
+                        } 
+                    }
+                }
+                else{
+                    var dst = outer.getDistance(el.x, el.y, value.x, value.y);
+                    if(distanceToEnemy > dst){
+                        distanceToEnemy = dst;
+                        enemy = value; 
+                    } 
+                }
             }
         });
     }
