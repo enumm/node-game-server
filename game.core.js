@@ -185,13 +185,17 @@ game_core.prototype.updateUnit = function(el, host){
                 }
                 else{
                     var dst = outer.getDistance(el.x, el.y, value.x, value.y);
-                    if(distanceToEnemy > dst){
-                        distanceToEnemy = dst;
-                        enemy = value; 
-                    } else if(distanceToEnemy == dst && enemy.hp < value.hp){
-                        distanceToEnemy = dst;
-                        enemy = value;
-                    } 
+                    if(distanceToEnemy > dst) {
+                        if(enemy && distanceToEnemy < 30){
+                            if(value.hp < enemy.hp){
+                                distanceToEnemy = dst;
+                                enemy = value;  
+                            }
+                        }else{
+                            distanceToEnemy = dst;
+                            enemy = value; 
+                        }
+                    }
                 }
             }
         });
@@ -203,12 +207,16 @@ game_core.prototype.updateUnit = function(el, host){
                 }
                 else{
                     var dst = outer.getDistance(el.x, el.y, value.x, value.y);
-                    if(distanceToEnemy > dst){
-                        distanceToEnemy = dst;
-                        enemy = value; 
-                    } else if(distanceToEnemy == dst && enemy.hp < value.hp){
-                        distanceToEnemy = dst;
-                        enemy = value;
+                    if(distanceToEnemy > dst) {
+                        if(enemy && distanceToEnemy < 30){
+                            if(value.hp < enemy.hp){
+                                distanceToEnemy = dst;
+                                enemy = value;  
+                            }
+                        }else{
+                            distanceToEnemy = dst;
+                            enemy = value; 
+                        }
                     }
                 }
             }
