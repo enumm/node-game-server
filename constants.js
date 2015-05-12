@@ -2,6 +2,19 @@ exports.Server = {
     Port: 3003
 };
 
+exports.CastleHost = {
+    x: -1150,
+    y: 1500,
+    range: 170
+};
+
+exports.CastleOpponent= {
+    x: 1250,
+    y: 1500,
+    range: 170
+};
+
+
 exports.DataBase = {
     Adress: 'mongodb://localhost/users',
     MinUserNameLenght: 3,
@@ -19,8 +32,8 @@ exports.UnitTypes = {
     FlyingPleb: {name: 'FlyingPleb', type: 'flying', damage: 5, armor: 4, movementSpeed: 60, life: 100, attackSpeed: 3, range: 35},
 
 
-    Bla: {name: 'Bla', type: 'ground', damage: 10, armor: 10, movementSpeed: 60, life: 100, attackSpeed: 1, range: 10},
-    RangedBla: {name: 'RangedBla', type: 'ranged', damage: 8, armor: 5, movementSpeed: 60, life: 100, attackSpeed: 2, range: 100},
+    Bla: {name: 'Bla', type: 'ground', damage: 10, armor: 10, movementSpeed: 60, life: 100, attackSpeed: 1, range: 15},
+    RangedBla: {name: 'RangedBla', type: 'ranged', damage: 8, armor: 5, movementSpeed: 60, life: 100, attackSpeed: 2, range: 120},
     FlyingBla: {name: 'FlyingBla', type: 'flying', damage: 5, armor: 4, movementSpeed: 60, life: 100, attackSpeed: 3, range: 35}
 };
 

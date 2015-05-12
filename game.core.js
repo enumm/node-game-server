@@ -262,35 +262,40 @@ game_core.prototype.updateUnit = function(el, host){
             el.attackTimer = 0;
         }
     }else{
-        if(el.path.length != 0){
-            var mapPositionToGo = el.path[0];
-            var positionToGo = this.mapToScreen(mapPositionToGo[0], mapPositionToGo[1]);
-
-            var dx = positionToGo[0]-el.x;
-            var dy = positionToGo[1]-el.y;
-
-            var length = Math.sqrt(dx*dx+dy*dy);
-
-            if(length != 0 ){
-                dx/=length;
-                dy/=length;
-
-
-                dx *= this.c.UnitTypes[el.unitType].movementSpeed * this._pdt;
-                dy *= this.c.UnitTypes[el.unitType].movementSpeed * this._pdt;
-
-                el.x += dx;
-                el.y += dy;
-            }
-
-            //console.log('skirtumas x: ' +(this.x -  positionToGo[0]) + ' y: ' + (this.y - positionToGo[1]));
-            if(el.x - positionToGo[0] < 1 && el.x - positionToGo[0] > - 1 && el.y - positionToGo[1] < 1 && el.y - positionToGo[1] > -1){
-                el.path.shift();
-            }
+        if( host && this.getDistance(el.x, el.y, this.c.CastleOpponent.x, this.c.CastleOpponent.y) - this.c.CastleOpponent.range < this.c.UnitTypes[el.unitType].range){
+            el.path = [];
+        } else if( !host && this.getDistance(el.x, el.y, this.c.CastleHost.x, this.c.CastleHost.y) - this.c.CastleHost.range < this.c.UnitTypes[el.unitType].range){
+            el.path = [];
         }else{
-            el.path = this.getPath(this.screenToMap(el.x, el.y)[0], this.screenToMap(el.x, el.y)[1], host);
-        }
+            if(el.path.length != 0){
+                var mapPositionToGo = el.path[0];
+                var positionToGo = this.mapToScreen(mapPositionToGo[0], mapPositionToGo[1]);
 
+                var dx = positionToGo[0]-el.x;
+                var dy = positionToGo[1]-el.y;
+
+                var length = Math.sqrt(dx*dx+dy*dy);
+
+                if(length != 0 ){
+                    dx/=length;
+                    dy/=length;
+
+
+                    dx *= this.c.UnitTypes[el.unitType].movementSpeed * this._pdt;
+                    dy *= this.c.UnitTypes[el.unitType].movementSpeed * this._pdt;
+
+                    el.x += dx;
+                    el.y += dy;
+                }
+
+                //console.log('skirtumas x: ' +(this.x -  positionToGo[0]) + ' y: ' + (this.y - positionToGo[1]));
+                if(el.x - positionToGo[0] < 1 && el.x - positionToGo[0] > - 1 && el.y - positionToGo[1] < 1 && el.y - positionToGo[1] > -1){
+                    el.path.shift();
+                }
+            }else{
+                el.path = this.getPath(this.screenToMap(el.x, el.y)[0], this.screenToMap(el.x, el.y)[1], host);
+            }  
+        }
     }
 };
 
