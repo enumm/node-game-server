@@ -238,7 +238,7 @@ game_core.prototype.updateUnit = function(el, host){
                     }
                 }
             }else{
-                 el.attackTimer = 0;
+                el.attackTimer = 0;
                 //walk to enemy
                 var dx = enemy.x - el.x;
                 var dy = enemy.y - el.y;
@@ -257,6 +257,9 @@ game_core.prototype.updateUnit = function(el, host){
                     el.y += dy;
                  }
             }
+        }
+        else{
+            el.attackTimer = 0;
         }
     }else{
         if(el.path.length != 0){
@@ -284,7 +287,10 @@ game_core.prototype.updateUnit = function(el, host){
             if(el.x - positionToGo[0] < 1 && el.x - positionToGo[0] > - 1 && el.y - positionToGo[1] < 1 && el.y - positionToGo[1] > -1){
                 el.path.shift();
             }
+        }else{
+            el.path = this.getPath(this.screenToMap(el.x, el.y)[0], this.screenToMap(el.x, el.y)[1], host);
         }
+
     }
 };
 
@@ -304,17 +310,36 @@ game_core.prototype.update_physics = function() {
     }
 
     //units update....
-    this.hostData.units.forEach(function(el){
-        if(!el.kill){
-            outer.updateUnit(el, true);
-        }
-    });
+    if(this.switchUpdate){
+        this.switchUpdate = false;
 
-    this.guestData.units.forEach(function(el){
-        if(!el.kill){
-            outer.updateUnit(el, false);
-        }
-    });
+        this.hostData.units.forEach(function(el){
+            if(!el.kill){
+                outer.updateUnit(el, true);
+            }
+        });
+
+        this.guestData.units.forEach(function(el){
+            if(!el.kill){
+                outer.updateUnit(el, false);
+            }
+        });
+
+    }else{
+        this.switchUpdate = true;
+
+        this.guestData.units.forEach(function(el){
+            if(!el.kill){
+                outer.updateUnit(el, false);
+            }
+        });
+
+        this.hostData.units.forEach(function(el){
+            if(!el.kill){
+                outer.updateUnit(el, true);
+            }
+        });
+    }
 
     //send data 
     this.clientUpdateTimer += this._pdt;
@@ -476,13 +501,17 @@ game_core.prototype.getMapMatrix = function(host){
     
     if(host){
         for (var i = 0, len = this.hostData.buildings.length; i < len; i++) {
-            var pos = this.screenToMap(this.hostData.buildings[i].x, this.hostData.buildings[i].y);
-            mapMatrix[pos[1]][pos[0]] = 1; 
+            if(!this.hostData.buildings[i].kill){
+                var pos = this.screenToMap(this.hostData.buildings[i].x, this.hostData.buildings[i].y);
+                mapMatrix[pos[1]][pos[0]] = 1; 
+            }
         }
     }else{
         for (var i = 0, len = this.guestData.buildings.length; i < len; i++) {
-            var pos = this.screenToMap(this.guestData.buildings[i].x, this.guestData.buildings[i].y);
-            mapMatrix[pos[1]][pos[0]] = 1; 
+            if(!this.guestData.buildings[i].kill){
+                var pos = this.screenToMap(this.guestData.buildings[i].x, this.guestData.buildings[i].y);
+                mapMatrix[pos[1]][pos[0]] = 1; 
+            }
         }
     }
 
