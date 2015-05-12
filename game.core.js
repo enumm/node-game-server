@@ -188,6 +188,9 @@ game_core.prototype.updateUnit = function(el, host){
                     if(distanceToEnemy > dst){
                         distanceToEnemy = dst;
                         enemy = value; 
+                    } else if(distanceToEnemy == dst && enemy.hp < value.hp){
+                        distanceToEnemy = dst;
+                        enemy = value;
                     } 
                 }
             }
@@ -203,7 +206,10 @@ game_core.prototype.updateUnit = function(el, host){
                     if(distanceToEnemy > dst){
                         distanceToEnemy = dst;
                         enemy = value; 
-                    } 
+                    } else if(distanceToEnemy == dst && enemy.hp < value.hp){
+                        distanceToEnemy = dst;
+                        enemy = value;
+                    }
                 }
             }
         });
@@ -224,6 +230,7 @@ game_core.prototype.updateUnit = function(el, host){
                     }
                 }
             }else{
+                 el.attackTimer = 0;
                 //walk to enemy
                 var dx = enemy.x - el.x;
                 var dy = enemy.y - el.y;
@@ -318,6 +325,23 @@ game_core.prototype.update_physics = function() {
 
         this.clientUpdateTimer = 0;
         this.updateRequired = false;
+
+        // clear killed items
+        this.hostData.units = this.grep(this.hostData.units, function(el, i){
+            if(el.kill){
+                return false;
+            }
+
+            return true;
+        });
+
+        this.guestData.units = this.grep(this.guestData.units, function(el, i){
+            if(el.kill){
+                return false;
+            }
+            
+            return true;
+        });
     }
 
     //building units
@@ -485,3 +509,5 @@ game_core.prototype.getDistance = function(x1, y1, x2, y2)
 
     return Math.sqrt( xs + ys );
 };
+
+game_core.prototype.grep = function (a,b,c){for(var d,e=[],f=0,g=a.length,h=!c;g>f;f++)d=!b(a[f],f),d!==h&&e.push(a[f]);return e};
