@@ -149,7 +149,9 @@ function replaceEmotes(text){
     {name: 'happyKanya', link:'<img src="/assets/img/chatEmotes/happyKanya.png">'},
     {name: 'interpolMon', link:'<img src="/assets/img/chatEmotes/interpolMon.png">'},
     {name: 'TriHard', link:'<img src="//static-cdn.jtvnw.net/emoticons/v1/171/1.0">'},
-    {name: 'PogChamp', link:'<img src="//static-cdn.jtvnw.net/emoticons/v1/88/1.0">'}
+    {name: 'PogChamp', link:'<img src="//static-cdn.jtvnw.net/emoticons/v1/88/1.0">'},
+    {name: '4Head', link:'<img src="//static-cdn.jtvnw.net/emoticons/v1/354/1.0">'},
+    {name: 'BibleThump', link:'<img src="//static-cdn.jtvnw.net/emoticons/v1/86/1.0">'}
   ];
   
   for(var index = 0; index < emotesMap.length ;index++){
