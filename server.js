@@ -3,6 +3,8 @@ var Const = require('./constants');
 var database = require('./databaseEngine');
 var lobby = require('./game.lobby.js');
 
+var authenticatedUsers = 0;
+
 io.listen(Const.Server.Port);
 console.log('Game server starting');
 
@@ -29,6 +31,10 @@ io.on('connection', function (socket) {
       socket.rdy = true;
 
       socket.join('mainChatRoom');
+
+      authenticatedUsers++;
+
+      io.to('mainChatRoom').emit('usersConnected',authenticatedUsers);
 
       socket.on('mainChat', function(msg){
         io.to('mainChatRoom').emit('chatMessage' ,{user: socket.username, message: escapeHtml(msg.message)});
@@ -81,6 +87,11 @@ io.on('connection', function (socket) {
   });
 
    socket.on('disconnect', function () {
+    if(socket.rdy){
+      authenticatedUsers--;
+      io.to('mainChatRoom').emit('usersConnected',authenticatedUsers);
+    }
+
     if(socket.game && socket.game.id) {
       lobby.endGame(socket.game.id, socket.username);
     }
