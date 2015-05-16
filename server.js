@@ -143,7 +143,7 @@ function replaceEmotes(text){
   ];
   
   for(var index = 0; index < emotesMap.length ;index++){
-    text = text.replace(emotesMap[index].name, emotesMap[index].link);
+    text = text.replace(new RegExp(emotesMap[index].name, 'g'), emotesMap[index].link);
   }
   return text;
 }
