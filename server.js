@@ -27,6 +27,13 @@ io.on('connection', function (socket) {
   socket.on('user_authenticated', function (data) {
     if(socket.clientId == data.uuid){
       socket.rdy = true;
+
+      socket.join('mainChatRoom');
+
+      socket.on('mainChat', function(msg){
+        io.to('mainChatRoom').emit('chatMessage' ,{user: socket.username, message: msg.message});
+      });
+
       console.log('User: "' + socket.username + '" authenticated');
     }
   });
