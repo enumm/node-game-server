@@ -53,7 +53,9 @@ io.on('connection', function (socket) {
       io.to('mainChatRoom').emit('usersConnected',authenticatedUsers);
 
       socket.on('mainChat', function(msg){
-        io.to('mainChatRoom').emit('chatMessage' ,{user: socket.username, message: escapeHtml(msg.message)});
+        var message = escapeHtml(msg.message);
+        message = replaceEmotes(message);
+        io.to('mainChatRoom').emit('chatMessage' ,{user: socket.username, message: message});
       });
 
       console.log('User: "' + socket.username + '" authenticated');
@@ -130,4 +132,18 @@ function escapeHtml(text) {
   };
 
   return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+}
+
+function replaceEmotes(text){
+  var emotesMap = [
+    {name: 'kappa', link:'<img src="//static-cdn.jtvnw.net/emoticons/v1/25/1.0">'},
+    {name: 'keepo', link:'<img src="//static-cdn.jtvnw.net/emoticons/v1/1902/1.0">'},
+    {name: 'DansGame', link:'<img src="//static-cdn.jtvnw.net/emoticons/v1/33/1.0">'},
+    {name: 'ResidentSleeper', link:'<img src="//static-cdn.jtvnw.net/emoticons/v1/245/1.0">'}
+  ];
+  
+  for(var index = 0; index < emotesMap.length ;index++){
+    text = text.replace(emotesMap[index].name, emotesMap[index].link);
+  }
+  return text;
 }
