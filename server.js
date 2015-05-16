@@ -139,7 +139,17 @@ function replaceEmotes(text){
     {name: 'kappa', link:'<img src="//static-cdn.jtvnw.net/emoticons/v1/25/1.0">'},
     {name: 'keepo', link:'<img src="//static-cdn.jtvnw.net/emoticons/v1/1902/1.0">'},
     {name: 'DansGame', link:'<img src="//static-cdn.jtvnw.net/emoticons/v1/33/1.0">'},
-    {name: 'ResidentSleeper', link:'<img src="//static-cdn.jtvnw.net/emoticons/v1/245/1.0">'}
+    {name: 'ResidentSleeper', link:'<img src="//static-cdn.jtvnw.net/emoticons/v1/245/1.0">'},
+    {name: 'idkkev', link:'<img src="//static-cdn.jtvnw.net/emoticons/v1/24548/1.0">'},
+    {name: 'Rplayer', link:'<img src="//static-cdn.jtvnw.net/emoticons/v1/31100/1.0">'},
+    {name: 'sadKanya', link:'<img src="/assets/img/chatEmotes/sadKanya.png">'},
+    {name: 'fedoraIntensifies', link:'<img src="assets/img/chatEmotes/fedoraIntensifies.png">'},
+    {name: 'youWatm9', link:'<img src="/assets/img/chatEmotes/youWatm9.png">'},
+    {name: 'jonSnow', link:'<img src="/assets/img/chatEmotes/jonSnow.png">'},
+    {name: 'happyKanya', link:'<img src="/assets/img/chatEmotes/happyKanya.png">'},
+    {name: 'interpolMon', link:'<img src="/assets/img/chatEmotes/interpolMon.png">'},
+    {name: 'TriHard', link:'<img src="//static-cdn.jtvnw.net/emoticons/v1/171/1.0">'},
+    {name: 'PogChamp', link:'<img src="//static-cdn.jtvnw.net/emoticons/v1/88/1.0">'}
   ];
   
   for(var index = 0; index < emotesMap.length ;index++){
