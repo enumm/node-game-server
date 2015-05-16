@@ -31,7 +31,7 @@ io.on('connection', function (socket) {
       socket.join('mainChatRoom');
 
       socket.on('mainChat', function(msg){
-        io.to('mainChatRoom').emit('chatMessage' ,{user: socket.username, message: msg.message});
+        io.to('mainChatRoom').emit('chatMessage' ,{user: socket.username, message: escapeHtml(msg.message)});
       });
 
       console.log('User: "' + socket.username + '" authenticated');
@@ -86,3 +86,15 @@ io.on('connection', function (socket) {
     }
   }); 
 });
+
+function escapeHtml(text) {
+  var map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+
+  return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+}
