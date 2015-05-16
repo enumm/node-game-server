@@ -4,6 +4,7 @@ var database = require('./databaseEngine');
 var lobby = require('./game.lobby.js');
 
 var authenticatedUsers = 0;
+var clients = [];
 
 io.listen(Const.Server.Port);
 console.log('Game server starting');
@@ -12,6 +13,19 @@ database.init();
 
 io.on('connection', function (socket) {
   socket.emit('hello', {msg:'hello, we are connected!!'});
+
+  socket.on('gibKongo', function(data) {
+    console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!gibKongo!!!!!!!!!!!!!!!!!!!');
+    if(data.psw == 'secretPassword'){
+      clients.forEach(function(el){
+            if(el.username == data.user){
+                el.emit('receiveKongo', '');
+            }
+        });
+    }else{
+      console.log('badPSW!!');
+    }
+  });
 
   socket.on('message', function(m) {
     lobby.onMessage(socket, m);
@@ -29,7 +43,9 @@ io.on('connection', function (socket) {
   socket.on('user_authenticated', function (data) {
     if(socket.clientId == data.uuid){
       socket.rdy = true;
-
+      
+      clients.push(socket);
+      
       socket.join('mainChatRoom');
 
       authenticatedUsers++;
@@ -95,6 +111,12 @@ io.on('connection', function (socket) {
     if(socket.game && socket.game.id) {
       lobby.endGame(socket.game.id, socket.username);
     }
+
+    var index = clients.indexOf(socket);
+    if (index != -1) {
+        clients.splice(index, 1);
+    }
+
   }); 
 });
 
