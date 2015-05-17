@@ -119,6 +119,12 @@ io.on('connection', function (socket) {
         clients.splice(index, 1);
     }
 
+  });
+
+  socket.on('check_game_status', function(){
+    if(socket.game && socket.game.id) {
+      lobby.checkGameStatus(socket.game.id);
+    }
   }); 
 });
 

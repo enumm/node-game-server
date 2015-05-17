@@ -161,6 +161,66 @@ lobby.endGame = function(gameid, username) {
         }
 };
 
+lobby.checkGameStatus = function(gameid) {
+    var thegame = this.games[gameid];
+    if(thegame){
+        if(thegame.gamecore.hostData.castleHp <= 0){
+            if(thegame.player_host){
+                delete thegame.player_host.game;
+                thegame.player_host.game = null;
+                thegame.player_host.emit('game_ended', {msg: 'you lost omg omg!'});
+            }
+
+            if(thegame.player_client){
+                delete thegame.player_client.game;
+                thegame.player_client.game = null;
+                thegame.player_client.emit('game_ended', {msg: 'you won omg omg!'});  
+            }
+
+            thegame.gamecore.sopAndDestroy();
+
+            thegame.gamecore.players.other = null;
+            thegame.gamecore.players.self = null;
+
+            delete thegame.gamecore.players.other;
+            delete thegame.gamecore.players.self;
+            
+            delete this.games[gameid];
+            this.game_count--;
+
+            this.log('game removed. there are now ' + this.game_count + ' games' );
+        }
+        if(thegame.gamecore.guestData.castleHp <= 0){
+            if(thegame.player_host){
+                delete thegame.player_host.game;
+                thegame.player_host.game = null;
+                thegame.player_host.emit('game_ended', {msg: 'you won omg omg!'});
+            }
+
+            if(thegame.player_client){
+                delete thegame.player_client.game;
+                thegame.player_client.game = null;
+                thegame.player_client.emit('game_ended', {msg: 'you lost omg omg'});
+            }
+
+            thegame.gamecore.sopAndDestroy();
+
+            thegame.gamecore.players.other = null;
+            thegame.gamecore.players.self = null;
+
+            delete thegame.gamecore.players.other;
+            delete thegame.gamecore.players.self;
+            
+            delete this.games[gameid];
+            this.game_count--;
+
+            this.log('game removed. there are now ' + this.game_count + ' games' );
+        }
+    }else{
+        this.log('that game was not found!');
+    }
+};
+
 lobby.stopMatching = function(gameid, username) {
 
         var thegame = this.games[gameid];
