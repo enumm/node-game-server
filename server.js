@@ -54,9 +54,19 @@ io.on('connection', function (socket) {
       io.to('mainChatRoom').emit('usersConnected',authenticatedUsers);
 
       socket.on('mainChat', function(msg){
-        var message = escapeHtml(msg.message);
-        message = replaceEmotes(message);
-        io.to('mainChatRoom').emit('chatMessage' ,{user: socket.username, message: message});
+        if(msg.message == '/online'){
+          var users ='</br>users online:</br>';
+          for(var i in clients)
+          {
+            users += (clients[i].username + '</br>');
+          }
+
+          socket.emit('chatMessage' ,{user: 'skynet3000', message: users});
+        }else{
+          var message = escapeHtml(msg.message);
+          message = replaceEmotes(message);
+          io.to('mainChatRoom').emit('chatMessage' ,{user: socket.username, message: message});
+        }
       });
 
       console.log('User: "' + socket.username + '" authenticated');
