@@ -264,9 +264,22 @@ game_core.prototype.updateUnit = function(el, host){
     }else{
         if( host && this.getDistance(el.x, el.y, this.c.CastleOpponent.x, this.c.CastleOpponent.y) - this.c.CastleOpponent.range < this.c.UnitTypes[el.unitType].range){
             el.path = [];
+            el.attackTimer += this._pdt;
+
+            if(el.attackTimer >= this.c.UnitTypes[el.unitType].attackSpeed){
+                el.attackTimer = 0;
+                this.guestData.castleHp -= this.c.UnitTypes[el.unitType].damage;
+            }
         } else if( !host && this.getDistance(el.x, el.y, this.c.CastleHost.x, this.c.CastleHost.y) - this.c.CastleHost.range < this.c.UnitTypes[el.unitType].range){
             el.path = [];
+            el.attackTimer += this._pdt;
+
+            if(el.attackTimer >= this.c.UnitTypes[el.unitType].attackSpeed){
+                el.attackTimer = 0;
+                this.hostData.castleHp -= this.c.UnitTypes[el.unitType].damage;
+            }
         }else{
+            el.attackTimer = 0;
             if(el.path.length != 0){
                 var mapPositionToGo = el.path[0];
                 var positionToGo = this.mapToScreen(mapPositionToGo[0], mapPositionToGo[1]);
