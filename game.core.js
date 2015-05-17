@@ -529,10 +529,10 @@ game_core.prototype.getPath = function(tx, ty, host){
     var grid;
     if(host){
         grid = new this.PF.Grid(this.getMapMatrix(true));
-        walkPath = this.finder.findPath(Math.ceil(tx), Math.ceil(ty), 31, 14, grid);
+        walkPath = this.finder.findPath(Math.ceil(tx), Math.ceil(ty), 32, 13, grid);
     }else{
         grid = new this.PF.Grid(this.getMapMatrix());
-        walkPath = this.finder.findPath(Math.ceil(tx), Math.ceil(ty), 14, 31, grid);  
+        walkPath = this.finder.findPath(Math.ceil(tx), Math.ceil(ty), 13, 32, grid);  
     }
 
     return walkPath;

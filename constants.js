@@ -3,15 +3,15 @@ exports.Server = {
 };
 
 exports.CastleHost = {
-    x: -1150,
-    y: 1500,
-    range: 170
+    x: -1170, 
+    y: 1450,
+    range: 70
 };
 
 exports.CastleOpponent= {
-    x: 1250,
-    y: 1500,
-    range: 170
+    x: 1200,
+    y: 1460,
+    range: 70
 };
 
 
