@@ -15,10 +15,11 @@ io.on('connection', function (socket) {
   socket.emit('hello', {msg:'hello, we are connected!!'});
 
   socket.on('gibKongo', function(data) {
-    console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!gibKongo!!!!!!!!!!!!!!!!!!!');
+    
     if(data.psw == 'secretPassword'){
       clients.forEach(function(el){
             if(el.username == data.user){
+              console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!gibKongo '+el.username  +' !!!!!!!!!!!!!!!!!!!');
                 el.emit('receiveKongo', '');
             }
         });
