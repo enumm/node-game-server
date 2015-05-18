@@ -115,6 +115,16 @@ io.on('connection', function (socket) {
     }
   });
 
+  socket.on('delete_friend', function (data) {
+    if(socket.rdy) {
+      if(socket.username != data.friendName){
+        database.delete_friend(data, socket);
+      }else{
+        socket.emit('friend_add_responce', {msg: 'cant delete self', success: false});
+      }
+    }
+  });
+
    socket.on('disconnect', function () {
     if(socket.rdy){
       authenticatedUsers--;

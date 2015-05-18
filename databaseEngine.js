@@ -104,12 +104,12 @@ databaseEngine.read_statistics = function(data, socket) {
 
 databaseEngine.read_friends = function(data, socket) {
     userDB.findOne({username: socket.username}, function (err, user) {
-        var friends = [];
-        for(var i =0; i < user.friends.length; i++){
-            friends.push(user.friends[i]);
-            console.log(user.friends[i].username);
-        }
-        socket.emit('get_user_friends_response', friends);    
+        // var friends = [];
+        // for(var i =0; i < user.friends.length; i++){
+        //     friends.push(user.friends[i]);
+        //     console.log(user.friends[i].username);
+        // }
+        socket.emit('get_user_friends_response', user.friends);    
     });
 };
 
@@ -134,13 +134,45 @@ databaseEngine.add_friend = function(data, socket) {
                     user.friends.push({username: foundFriend.username});
                     user.save(function(err, user){
                         socket.emit('friend_add_responce', {msg: 'friend added: ' + foundFriend.username, success: true});
+                        socket.emit('get_user_friends_response', user.friends);    
                     });
-                    console.log(user.friends.length);
-                    for(var i = 0; i < user.friends.length;i++){
-                        console.log(user.friends[i].username);
-                    }
+                    // console.log(user.friends.length);
+                    // for(var i = 0; i < user.friends.length;i++){
+                    //     console.log(user.friends[i].username);
+                    // }
                 }
             });
+        }
+    });
+};
+
+databaseEngine.delete_friend = function(data, socket) {
+    userDB.findOne({username: socket.username}, function (err, user) {
+        if(err){
+            console.error(err);
+        }else{
+            var exists = false;
+
+            for(var i = 0; i < user.friends.length; i++){
+                if(user.friends[i].username == data.friendName){
+                    exists = true;
+                }
+            }
+
+            if(exists){
+                user.friends = user.friends.filter(function (el){
+                    return el.username !== data.friendName;
+                });
+
+                user.save(function(err, user){
+                    socket.emit('friend_add_responce', {msg: 'friend removed: ' + data.friendName, success: true});
+                    socket.emit('get_user_friends_response', user.friends);
+                });
+            }else{
+                socket.emit('friend_add_responce', {msg: 'Friend not found: ' + data.friendName, success: false});
+            }
+
+            
         }
     });
 };
