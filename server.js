@@ -147,6 +147,19 @@ io.on('connection', function (socket) {
       lobby.checkGameStatus(socket.game.id);
     }
   }); 
+
+  socket.on('get_online_user_list', function(){
+    if(socket.rdy){
+      var users = [];
+      for(var i in clients)
+      {
+        users.push({username: clients[i].username, online: true});
+      }
+    }
+
+    socket.emit('online_users', users);
+  }); 
+
 });
 
 function escapeHtml(text) {
@@ -185,4 +198,4 @@ function replaceEmotes(text){
     text = text.replace(new RegExp(emotesMap[index].name, 'g'), emotesMap[index].link);
   }
   return text;
-}
+};
