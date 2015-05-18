@@ -110,7 +110,7 @@ io.on('connection', function (socket) {
       if(socket.username != data.friendName){
         database.add_friend(data, socket);
       }else{
-        console.log("can't add self");
+        socket.emit('friend_add_responce', {msg: 'cant add self', success: false});
       }
     }
   });

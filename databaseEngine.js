@@ -116,22 +116,24 @@ databaseEngine.read_friends = function(data, socket) {
 databaseEngine.add_friend = function(data, socket) {
     userDB.findOne({username: socket.username}, function (err, user) {
         var alreadyAdded = false;
+
         for(var i = 0; i < user.friends.length; i++){
             if(user.friends[i].username == data.friendName){
                 alreadyAdded = true;
-                console.log('friend aldready added: ' + data.friendName);
+                socket.emit('friend_add_responce', {msg: 'friend aldready added: ' + data.friendName, success: false});
             }
         }
+
         if(!alreadyAdded){
            userDB.findOne({username: data.friendName}, function (err,foundFriend){
                 if(err){
                     console.error(err);
                 }else if(!foundFriend){
-                    console.log("friend not found: " + data.friendName);
+                    socket.emit('friend_add_responce', {msg: 'user not found: ' + data.friendName, success: false});
                 }else{
                     user.friends.push({username: foundFriend.username});
                     user.save(function(err, user){
-                        console.log("friend added: " + foundFriend.username);
+                        socket.emit('friend_add_responce', {msg: 'friend added: ' + foundFriend.username, success: true});
                     });
                     console.log(user.friends.length);
                     for(var i = 0; i < user.friends.length;i++){
