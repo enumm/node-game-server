@@ -55,7 +55,8 @@ databaseEngine.update_statistics = function(won, username, gType){
             });
         }
     });
-    //console.log(username + ' ' + (won? 'won' : 'lost') + ' gameType: ' +  gType);
+    
+    console.log(username + ' ' + (won? 'won' : 'lost') + ' gameType: ' +  gType);
 };
 
 databaseEngine.register_user = function(data, socket) {

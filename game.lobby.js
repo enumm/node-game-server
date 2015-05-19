@@ -39,7 +39,7 @@ lobby.startGame = function(game) {
     game.active = true;
 }; //game_server.startGame
 
-lobby.createGame = function(player, gameType) {
+lobby.createGame = function(player, gameType, friend, sockets) {
     //Create a new game instance
     var thegame = {
         id : uuid(),                //generate a new id for the game
@@ -71,12 +71,25 @@ lobby.createGame = function(player, gameType) {
         
     this.log('User "' + player.username + '" created a game with id ' + player.game.id);
 
+    if(friend && sockets){
+        console.log('sending game invite to: ' + friend);
+        
+        for(var i in sockets){
+            if(sockets[i].username == friend)
+            {
+                thegame.friend = friend;
+                sockets[i].emit('game_invite', {user:player.username, gameId: player.game.id});
+                break;
+            }
+        }
+    }
+
     //return it
 
     return thegame;
 }; 
 
-lobby.findGame = function(player, gameType) {
+lobby.findGame = function(player, gameType, friend, sockets) {
     this.log('User: "' + player.username + '" is looking for a game, game count: ' + this.game_count);
     this.log('GameType: "' + gameType + '"');
 
@@ -117,8 +130,7 @@ lobby.findGame = function(player, gameType) {
         } //if no join already
     } else { //if there are any games at all
         //no games? create one!
-        
-        this.createGame(player, gameType);
+        this.createGame(player, gameType, friend, sockets);   
     }
 }; //game_server.findGame
 

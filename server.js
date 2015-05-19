@@ -79,7 +79,12 @@ io.on('connection', function (socket) {
     if(socket.rdy && !socket.game){
       console.log('User: "' + socket.username + '" wants to play');
       socket.race = data.race; 
-      lobby.findGame(socket, data.gameType);
+      if(data.gameType == 'private'){
+        lobby.findGame(socket, data.gameType, data.friend, clients);  
+      }else{
+        lobby.findGame(socket, data.gameType);  
+      }
+      
     }
   });
 
