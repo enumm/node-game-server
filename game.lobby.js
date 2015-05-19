@@ -78,7 +78,7 @@ lobby.createGame = function(player, gameType) {
 
 lobby.findGame = function(player, gameType) {
     this.log('User: "' + player.username + '" is looking for a game, game count: ' + this.game_count);
-    this.log('GameType: "' + gameType);
+    this.log('GameType: "' + gameType + '"');
 
     if(gameType != 'private' && this.game_count) {
         var inGame = false;
@@ -122,25 +122,35 @@ lobby.findGame = function(player, gameType) {
     }
 }; //game_server.findGame
 
-lobby.endGame = function(gameid, username) {
+lobby.endGame = function(gameid, username, database) {
 
         var thegame = this.games[gameid];
 
         if(thegame) {
-
-                //stop the game updates immediate
-            //thegame.gamecore.stop_update();
-
             if(thegame.player_host){
                 delete thegame.player_host.game;
                 thegame.player_host.game = null;
-                thegame.player_host.emit('game_ended', {msg: 'Game ended, player: "' + username + '" disconected'})
+                thegame.player_host.emit('game_ended', {msg: 'Game ended, player: "' + username + '" disconected'});
+
+                if(thegame.player_host.username == username){
+                    database.update_statistics(false, username, thegame.game_type);     
+                }
+                else{
+                    database.update_statistics(true, thegame.player_host.username, thegame.game_type);  
+                }
             }
 
             if(thegame.player_client){
                 delete thegame.player_client.game;
                 thegame.player_client.game = null;
                 thegame.player_client.emit('game_ended', {msg: 'Game ended, player: "' + username + '" disconected'})
+
+                if(thegame.player_client.username == username){
+                    database.update_statistics(false, username, thegame.game_type);     
+                }
+                else{
+                    database.update_statistics(true, thegame.player_client.username, thegame.game_type);  
+                }
             }
 
             thegame.gamecore.sopAndDestroy();
@@ -161,7 +171,7 @@ lobby.endGame = function(gameid, username) {
         }
 };
 
-lobby.checkGameStatus = function(gameid) {
+lobby.checkGameStatus = function(gameid, database) {
     var thegame = this.games[gameid];
     if(thegame){
         if(thegame.gamecore.hostData.castleHp <= 0){
@@ -169,12 +179,14 @@ lobby.checkGameStatus = function(gameid) {
                 delete thegame.player_host.game;
                 thegame.player_host.game = null;
                 thegame.player_host.emit('game_ended', {msg: 'you lost omg omg!'});
+                database.update_statistics(false,  thegame.player_host.username, thegame.game_type);
             }
 
             if(thegame.player_client){
                 delete thegame.player_client.game;
                 thegame.player_client.game = null;
-                thegame.player_client.emit('game_ended', {msg: 'you won omg omg!'});  
+                thegame.player_client.emit('game_ended', {msg: 'you won omg omg!'});
+                database.update_statistics(true, thegame.player_client.username, thegame.game_type);  
             }
 
             thegame.gamecore.sopAndDestroy();
@@ -195,12 +207,14 @@ lobby.checkGameStatus = function(gameid) {
                 delete thegame.player_host.game;
                 thegame.player_host.game = null;
                 thegame.player_host.emit('game_ended', {msg: 'you won omg omg!'});
+                database.update_statistics(true,  thegame.player_host.username, thegame.game_type);
             }
 
             if(thegame.player_client){
                 delete thegame.player_client.game;
                 thegame.player_client.game = null;
                 thegame.player_client.emit('game_ended', {msg: 'you lost omg omg'});
+                database.update_statistics(false, thegame.player_client.username, thegame.game_type);
             }
 
             thegame.gamecore.sopAndDestroy();

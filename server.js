@@ -38,11 +38,13 @@ io.on('connection', function (socket) {
   });
 
   socket.on('user_login', function (data) {
-    database.login_user(data, socket);
+    if(!socket.rdy){
+      database.login_user(data, socket);  
+    }
   });
 
   socket.on('user_authenticated', function (data) {
-    if(socket.clientId == data.uuid){
+    if(socket.clientId == data.uuid && !socket.rdy){
       socket.rdy = true;
       
       clients.push(socket);
@@ -132,7 +134,7 @@ io.on('connection', function (socket) {
     }
 
     if(socket.game && socket.game.id) {
-      lobby.endGame(socket.game.id, socket.username);
+      lobby.endGame(socket.game.id, socket.username, database);
     }
 
     var index = clients.indexOf(socket);
@@ -144,7 +146,7 @@ io.on('connection', function (socket) {
 
   socket.on('check_game_status', function(){
     if(socket.game && socket.game.id) {
-      lobby.checkGameStatus(socket.game.id);
+      lobby.checkGameStatus(socket.game.id,  database);
     }
   }); 
 

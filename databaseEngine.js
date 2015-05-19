@@ -34,6 +34,30 @@ databaseEngine.init = function() {
 	userDB = mongoose.model('userDB', userSchema);
 };
 
+databaseEngine.update_statistics = function(won, username, gType){
+    userDB.findOne({username: username}, function (err, user) {
+        if (err){
+            console.error(err);   
+        }
+        else if(user){
+            if(won){
+                if(gType == 'casual' || gType == 'private' ){
+                    user.statistics.wins++;       
+                }else if(gType == 'ranked'){
+                    user.statistics.ranked_wins++;       
+                }
+            }else{
+                  user.statistics.losses++;
+            }
+
+            user.save(function(err, user){
+
+            });
+        }
+    });
+    //console.log(username + ' ' + (won? 'won' : 'lost') + ' gameType: ' +  gType);
+};
+
 databaseEngine.register_user = function(data, socket) {
 	if(data.name.length < Const.DataBase.MinUserNameLenght){
 		socket.emit('user_register_response',  {success: false, message: 'Username is too short'});
