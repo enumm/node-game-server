@@ -247,11 +247,20 @@ lobby.checkGameStatus = function(gameid, database) {
     }
 };
 
-lobby.stopMatching = function(gameid, username) {
+lobby.stopMatching = function(gameid, username, clients) {
 
         var thegame = this.games[gameid];
         //TODO: DONT KNOW WHATS NEEDED HERE WHATS NOT
         if(thegame) {
+
+            if(thegame.friend && clients){
+                for(var i in clients){
+                    if(clients[i].username == thegame.friend){
+                        clients[i].emit('game_invite_revoked');
+                        break;
+                    }
+                }
+            }
 
             if(thegame.player_host){
                 delete thegame.player_host.game;

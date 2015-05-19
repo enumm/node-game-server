@@ -110,7 +110,7 @@ io.on('connection', function (socket) {
 
   socket.on('cancel_matchmaking', function (data) {
     if(socket.game && socket.game.id) {
-      lobby.stopMatching(socket.game.id, socket.username);
+      lobby.stopMatching(socket.game.id, socket.username, clients);
     }
   });
 
