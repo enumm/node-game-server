@@ -39,7 +39,21 @@ io.on('connection', function (socket) {
 
   socket.on('user_login', function (data) {
     if(!socket.rdy){
-      database.login_user(data, socket);  
+      var connected = false;
+
+      for(var i in clients){
+        if(clients[i].username == data.name){
+          connected = true;
+          break;
+        }
+      }
+
+      if(!connected){
+        database.login_user(data, socket);  
+      }
+      else{
+        socket.emit('user_login_response',  {success: false, message: 'User already logged on!'});
+      }
     }
   });
 
