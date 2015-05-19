@@ -265,13 +265,13 @@ lobby.stopMatching = function(gameid, username, clients) {
             if(thegame.player_host){
                 delete thegame.player_host.game;
                 thegame.player_host.game = null;
-                thegame.player_host.emit('matchmaking_canceled', {msg: 'Game ended, player: "' + username + '" disconected'})
+                thegame.player_host.emit('matchmaking_canceled', {msg: 'Game ended, player: "' + username + '" disconected'});
             }
 
             if(thegame.player_client){
                 delete thegame.player_client.game;
                 thegame.player_client.game = null;
-                thegame.player_client.emit('matchmaking_canceled', {msg: 'Game ended, player: "' + username + '" disconected'})
+                thegame.player_client.emit('matchmaking_canceled', {msg: 'Game ended, player: "' + username + '" disconected'});
             }
 
             thegame.gamecore.players.other = null;
@@ -288,4 +288,36 @@ lobby.stopMatching = function(gameid, username, clients) {
         } else {
             this.log('that game was not found!');
         }
+};
+
+lobby.privateGameRejected = function(gameId){
+
+    var thegame = this.games[gameId];
+    if(thegame) {
+        if(thegame.player_host){
+            delete thegame.player_host.game;
+            thegame.player_host.game = null;
+            thegame.player_host.emit('game_invite_revoked',{});
+        }
+
+        if(thegame.player_client){
+            delete thegame.player_client.game;
+            thegame.player_client.game = null;
+            thegame.player_client.emit('game_invite_revoked', {});
+        }
+
+        thegame.gamecore.players.other = null;
+        thegame.gamecore.players.self = null;
+
+        delete thegame.gamecore.players.other;
+        delete thegame.gamecore.players.self;
+        
+        delete this.games[gameId];
+        this.game_count--;
+
+        this.log('game removed. there are now ' + this.game_count + ' games' );
+
+    } else {
+        this.log('that game was not found!');
+    }
 };

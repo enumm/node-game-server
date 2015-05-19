@@ -181,6 +181,15 @@ io.on('connection', function (socket) {
     socket.emit('online_users', users);
   }); 
 
+  socket.on('cancel_invite', function(data){
+    if(socket.rdy) {
+      lobby.privateGameRejected(data.gameId);
+      //lobby.checkGameStatus(socket.game.id,  database);
+    }
+  }); 
+
+  
+
 });
 
 function escapeHtml(text) {
