@@ -193,6 +193,21 @@ io.on('connection', function (socket) {
       lobby.privateGameAccepted(socket, data.gameId, data.race);
     }
   }); 
+
+  socket.on('ingameChat', function(data){
+    if(socket.rdy && socket.game) {
+      var message = escapeHtml(data.message);
+      message = replaceEmotes(message);
+      var game = socket.game;
+
+      if(game.player_client){
+        game.player_client.emit('ingameChatMessage', {user: socket.username, message: message});  
+      }
+      if(game.player_host){
+        game.player_host.emit('ingameChatMessage', {user: socket.username, message: message});  
+      }
+    }
+  });
 });
 
 function escapeHtml(text) {

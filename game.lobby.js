@@ -112,6 +112,7 @@ lobby.findGame = function(player, gameType, friend, sockets) {
                 inGame = true;
                 //increase the player count and store
                 //the player as the client of this game
+                player.hosting = false;
                 game_instance.player_client = player;
                 game_instance.gamecore.players.other = player;
                 game_instance.player_count++;
@@ -327,6 +328,7 @@ lobby.privateGameAccepted = function(player, gameId, race){
 
     if(thegame) {
         if(thegame.game_type == 'private' && thegame.player_count < 2) {
+            player.hosting = false;
             thegame.player_client = player;
             thegame.player_client.race = race;
             thegame.gamecore.players.other = player;
