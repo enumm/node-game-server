@@ -321,3 +321,17 @@ lobby.privateGameRejected = function(gameId){
         this.log('that game was not found!');
     }
 };
+
+lobby.privateGameAccepted = function(player, gameId, race){
+    var thegame = this.games[gameId];
+
+    if(thegame) {
+        if(thegame.game_type == 'private' && thegame.player_count < 2) {
+            thegame.player_client = player;
+            thegame.player_client.race = race;
+            thegame.gamecore.players.other = player;
+            thegame.player_count++;
+            this.startGame(thegame);
+        } 
+    }
+};

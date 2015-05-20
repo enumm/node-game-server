@@ -188,8 +188,11 @@ io.on('connection', function (socket) {
     }
   }); 
 
-  
-
+  socket.on('accept_invite', function(data){
+    if(socket.rdy) {
+      lobby.privateGameAccepted(socket, data.gameId, data.race);
+    }
+  }); 
 });
 
 function escapeHtml(text) {

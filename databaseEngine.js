@@ -41,13 +41,15 @@ databaseEngine.update_statistics = function(won, username, gType){
         }
         else if(user){
             if(won){
-                if(gType == 'casual' || gType == 'private' ){
+                if(gType == 'casual'){
                     user.statistics.wins++;       
                 }else if(gType == 'ranked'){
                     user.statistics.ranked_wins++;       
                 }
             }else{
-                  user.statistics.losses++;
+                if(gType == 'casual' || gType == 'ranked'){
+                   user.statistics.losses++;
+                }            
             }
 
             user.save(function(err, user){
@@ -55,7 +57,7 @@ databaseEngine.update_statistics = function(won, username, gType){
             });
         }
     });
-    
+
     console.log(username + ' ' + (won? 'won' : 'lost') + ' gameType: ' +  gType);
 };
 
