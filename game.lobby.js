@@ -99,7 +99,13 @@ lobby.findGame = function(player, gameType, friend, sockets, statistics) {
         var iterationLimitMultiplier = 10;
 
         while(iteration < this.game_count * iterationLimitMultiplier){
-            var filteredGames = filterGames(this.games, statistics, gameType, iteration);
+            console.log('MatchMaking Iteration: '+ iteration);
+            if(gameType == 'casual'){
+            var filteredGames = this.games;
+            }else{
+            var filteredGames = filterGames(this.games, statistics, gameType, iteration);    
+            }
+            
             for(var gameid in filteredGames){
                 //get the game we are checking against
                 //only care about our own properties.
@@ -161,7 +167,7 @@ lobby.findGame = function(player, gameType, friend, sockets, statistics) {
                 }
                 internalIteration++;
             }
-            console.log('filtering games by winrate: '+winRate);
+            // console.log('filtering games by winrate: '+winRate);
             filtered = filterWinRate(filtered, winRate, iteration);
             return filtered;
         }
@@ -227,7 +233,7 @@ lobby.findGame = function(player, gameType, friend, sockets, statistics) {
             var filtered = games;
 
             filtered = filterGameType(filtered, gameType);
-            console.log('filtering games by rank: '+rank);
+            // console.log('filtering games by rank: '+rank);
             filtered = filterStats(filtered, rank , winRate, iteration);
 
             return filtered;
