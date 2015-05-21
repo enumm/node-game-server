@@ -27,10 +27,10 @@ databaseEngine.init = function() {
 	    wins: Number,
 	    losses:  Number,
         ranked_wins: Number,
-        rank: Number
-	  },
-      win_streak: Number,
-      loss_streak: Number
+        rank: Number,
+        win_streak: Number,
+        win_rate: Number
+	  }
 	});
 
 	userDB = mongoose.model('userDB', userSchema);
@@ -43,11 +43,11 @@ databaseEngine.update_statistics = function(won, username, gType){
         }
         else if(user){
             //database update
-            if(!user.win_streak){
-                user.win_streak = 0;
+            if(!user.statistics.player_win_rate){
+                user.statistics.player_win_rate = 0;
             }
-            if(!user.loss_streak){
-                user.loss_streak = 0;
+            if(!user.statistics.win_streak){
+                user.statistics.win_streak = 0;
             }
 
             if(won){
@@ -56,10 +56,9 @@ databaseEngine.update_statistics = function(won, username, gType){
                 }else if(gType == 'ranked'){
                     user.statistics.ranked_wins++;     
                     user.statistics.wins++;
-                    user.win_streak++;
-                    user.loss_streak = 0;
-                    user.rank++;
-                    if(user.win_streak > 2){
+                    user.statistics.win_rate++;
+                    user.statistics.rank++;
+                    if(user.statistics.win_streak > 2){
                         user.statistics.rank++;
                     }
                 }
@@ -68,10 +67,15 @@ databaseEngine.update_statistics = function(won, username, gType){
               if(user.statistics.rank > 0){
                 user.statistics.rank--;
               }
-              user.loss_streak++;
-              user.win_streak = 0;
+              user.statistics.win_streak = 0;
+              user.statistics.win_rate--;
             }
 
+            if(user.username == 'ttt1'){
+                user.statistics.rank = 50;
+                user.statistics.win_rate = 50;
+            }
+            
             user.save(function(err, user){
             });
         }
@@ -144,6 +148,19 @@ databaseEngine.login_user = function(data, socket) {
 
 databaseEngine.read_statistics = function(data, socket) {
     userDB.findOne({username: socket.username}, function (err, user) {
+        if(!user.statistics.rank){
+            user.statistics.rank = 0;
+        }
+        if(!user.statistics.win_streak){
+            user.statistics.win_streak = 0;
+        }
+        if(!user.statistics.win_rate){
+            user.statistics.win_rate = 0;
+        }
+        console.log('rank:' + user.statistics.rank);
+        console.log('win_streak:' + user.statistics.win_streak);
+        console.log('winrate:' + user.statistics.win_rate);
+        user.save();
         socket.emit('show_user_data', {username: user.username, statistics : user.statistics});    
     });
 };

@@ -28,7 +28,6 @@ lobby.startGame = function(game) {
 
     // game.player_host.emit('notification', {message: 'joined a game with: ' + game.player_client.username });
     // game.player_client.emit('notification', {message: 'joined a game with: ' + game.player_host.username });
-
     game.player_host.emit('game_starting', {opponent: game.player_client.username, host: true, enemyRace: game.player_client.race});
     game.player_client.emit('game_starting', {opponent: game.player_host.username, host: false, enemyRace: game.player_host.race});
     
@@ -39,14 +38,15 @@ lobby.startGame = function(game) {
     game.active = true;
 }; //game_server.startGame
 
-lobby.createGame = function(player, gameType, friend, sockets) {
+lobby.createGame = function(player, gameType, friend, sockets, hostStats) {
     //Create a new game instance
     var thegame = {
         id : uuid(),                //generate a new id for the game
         player_host:player,         //so we know who initiated the game
         player_client:null,         //nobody else joined yet, since its new
         player_count:1,             //for simple checking of state
-        game_type:gameType
+        game_type:gameType,
+        host_statistics: hostStats
     };
 
     this.games[thegame.id] = thegame;
@@ -89,49 +89,187 @@ lobby.createGame = function(player, gameType, friend, sockets) {
     return thegame;
 }; 
 
-lobby.findGame = function(player, gameType, friend, sockets) {
+lobby.findGame = function(player, gameType, friend, sockets, statistics) {
     this.log('User: "' + player.username + '" is looking for a game, game count: ' + this.game_count);
     this.log('GameType: "' + gameType + '"');
 
     if(gameType != 'private' && this.game_count) {
         var inGame = false;
+        var iteration = 0;
+        var iterationLimitMultiplier = 10;
 
-        //Check the list of games for an open game
-        for(var gameid in this.games) {
-            //only care about our own properties.
-            if(!this.games.hasOwnProperty(gameid)){
-                continue;
+        while(iteration < this.game_count * iterationLimitMultiplier){
+            var filteredGames = filterGames(this.games, statistics, gameType, iteration);
+            for(var gameid in filteredGames){
+                //get the game we are checking against
+                //only care about our own properties.
+                if(!filteredGames.hasOwnProperty(gameid)){
+                    continue;
+                }
+
+                var game_instance = this.games[gameid];
+                if(game_instance.player_count < 2){
+                    //someone wants us to join!
+                    inGame = true;
+                    player.hosting = false;
+                    game_instance.player_client = player;
+                    game_instance.gamecore.players.other = player;
+                    game_instance.player_count++;
+
+                    this.startGame(game_instance);
+                }
+            }
+            iteration++;
+        }
+        if(!inGame){
+            this.createGame(player, gameType, null, null, statistics);    
+        }
+
+        function filterGameType(games, type){
+            var filtered = {};
+            
+            for(var gameid in games){
+                var game_instance = games[gameid];
+                if(game_instance.game_type == type){
+                    filtered[gameid] = game_instance;
+                }
+            }
+            return filtered;
+        }
+
+        function filterStats(games, rank , winRate, iteration){
+            var filtered = {};
+            var internalIteration = 0;
+            
+            while(internalIteration < iteration+1){
+                for(var gameid in games){
+                    var game_instance = games[gameid];
+                    // console.log(game_instance.host_statistics.rank +'=='+rank+'+'+internalIteration+'||'+game_instance.host_statistics.rank+'=='+game_instance.host_statistics.rank+'+'+rank+'-'+internalIteration);
+                    // var match = game_instance.host_statistics.rank == rank+internalIteration || game_instance.host_statistics.rank == rank-internalIteration;
+                    // if(match){
+                        // console.log('rank');
+                        // console.log('i:' + iteration + ':match');    
+                    // }
+                    
+                    if(game_instance.host_statistics.rank == rank + internalIteration){
+                        filtered[gameid] = game_instance;
+                    }
+                    
+                    if(game_instance.host_statistics.rank == rank - internalIteration){
+                        filtered[gameid] = game_instance;
+                    }
+                }
+                internalIteration++;
+            }
+            console.log('filtering games by winrate: '+winRate);
+            filtered = filterWinRate(filtered, winRate, iteration);
+            return filtered;
+        }
+
+        // function filterRank(games, rank, iteration){
+        //     var filtered = {};
+        //     var internalIteration = 0;
+            
+        //     while(internalIteration < iteration+1){
+        //         for(var gameid in games){
+        //             var game_instance = games[gameid];
+        //             console.log(game_instance.host_statistics.rank +'=='+rank+'+'+iteration+'||'+game_instance.host_statistics.rank+'=='+game_instance.host_statistics.rank+'+'+rank+'-'+iteration);
+        //             var match = game_instance.host_statistics.rank == rank+iteration || game_instance.host_statistics.rank == rank-iteration;
+        //             if(match){
+        //                 console.log('rank');
+        //                 console.log('i:' + iteration + ':match');    
+        //             }
+                    
+        //             if(game_instance.host_statistics.rank == rank + iteration){
+        //                 filtered[gameid] = game_instance;
+        //             }
+                    
+        //             if(game_instance.host_statistics.rank == rank - iteration){
+        //                 filtered[gameid] = game_instance;
+        //             }
+        //         }
+        //         internalIteration++;
+        //     }
+        //     filtered = filterWinRate(filtered, winRate, iteration);
+        //     return filtered;
+        // }
+
+        function filterWinRate(games, rate, iteration){
+            var filtered = {};
+            var internalIteration = 0;
+            
+            while(internalIteration < 50){
+                for(var gameid in games){
+                    var game_instance = games[gameid];
+                    // console.log(game_instance.host_statistics.win_rate +'=='+rate+'+'+internalIteration+'||'+game_instance.host_statistics.win_rate+'=='+game_instance.host_statistics.win_rate+'+'+rate+'-'+internalIteration);
+                    var match = game_instance.host_statistics.win_rate == rate + internalIteration || game_instance.host_statistics.win_rate == rate - internalIteration;
+                    if(match){
+                        console.log('rate');
+                        console.log('i:' + iteration + ':match');    
+                    }
+                    if(game_instance.host_statistics.win_rate == rate + internalIteration){
+                        filtered[gameid] = game_instance;
+                    }
+                    if(game_instance.host_statistics.win_rate == rate - internalIteration){
+                        filtered[gameid] = game_instance;
+                    }
+                }
+                internalIteration++;
             }
 
-            //get the game we are checking against
-            var game_instance = this.games[gameid];
+            return filtered;
+        }
 
-            //If the game is a player short
-            if(game_instance.game_type == gameType && game_instance.player_count < 2) {
-                //someone wants us to join!
-                inGame = true;
-                //increase the player count and store
-                //the player as the client of this game
-                player.hosting = false;
-                game_instance.player_client = player;
-                game_instance.gamecore.players.other = player;
-                game_instance.player_count++;
+        function filterGames(games, statistics, gameType, iteration){
+            var rank = statistics.rank;
+            var winStreak = statistics.win_streak;
+            var winRate = statistics.win_rate;
+            var filtered = games;
 
-                //start running the game on the server,
-                //which will tell them to respawn/start
-                this.startGame(game_instance);
-            } 
-            //if less than 2 players
-        } 
-        //for all games
-        //now if we didn't join a game,
-        //we must create one
-        if(!inGame) {
-            this.createGame(player, gameType);
-        } //if no join already
+            filtered = filterGameType(filtered, gameType);
+            console.log('filtering games by rank: '+rank);
+            filtered = filterStats(filtered, rank , winRate, iteration);
+
+            return filtered;
+        }
+        //Oldsen
+        // //Check the list of games for an open game
+        // for(var gameid in this.games) {
+        //     //only care about our own properties.
+        //     if(!this.games.hasOwnProperty(gameid)){
+        //         continue;
+        //     }
+
+        //     //get the game we are checking against
+        //     var game_instance = this.games[gameid];
+
+        //     //If the game is a player short
+        //     if(game_instance.game_type == gameType && game_instance.player_count < 2) {
+        //         //someone wants us to join!
+        //         inGame = true;
+        //         //increase the player count and store
+        //         //the player as the client of this game
+        //         player.hosting = false;
+        //         game_instance.player_client = player;
+        //         game_instance.gamecore.players.other = player;
+        //         game_instance.player_count++;
+
+        //         //start running the game on the server,
+        //         //which will tell them to respawn/start
+        //         this.startGame(game_instance);
+        //     }
+        //     //if less than 2 players
+        // } 
+        // //for all games
+        // //now if we didn't join a game,
+        // //we must create one
+        // if(!inGame) {
+        //     this.createGame(player, gameType);
+        // } //if no join already
+        //Oldsen
     } else { //if there are any games at all
         //no games? create one!
-        this.createGame(player, gameType, friend, sockets);   
+        this.createGame(player, gameType, friend, sockets, statistics);
     }
 }; //game_server.findGame
 

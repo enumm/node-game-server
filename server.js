@@ -96,7 +96,7 @@ io.on('connection', function (socket) {
       if(data.gameType == 'private'){
         lobby.findGame(socket, data.gameType, data.friend, clients);  
       }else{
-        lobby.findGame(socket, data.gameType);  
+        lobby.findGame(socket, data.gameType, null, null, data.statistics);  
       }
       
     }
