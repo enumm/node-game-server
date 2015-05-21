@@ -51,25 +51,35 @@ databaseEngine.update_statistics = function(won, username, gType){
             }
 
             if(won){
-                if(gType == 'casual'){
-                    user.statistics.wins++;
-                }else if(gType == 'ranked'){
-                    user.statistics.ranked_wins++;     
-                    user.statistics.wins++;
+                user.statistics.wins++;
+                
+                if(gType == 'ranked'){
+                    user.statistics.ranked_wins++;
                     user.statistics.win_rate++;
                     user.statistics.rank++;
                     if(user.statistics.win_streak > 2){
                         user.statistics.rank++;
+                        user.statistics.win_streak++;
+                        if(user.statistics.win_streak > 3){
+                            user.statistics.win_rate++;
+                        }
+                    }else{
+                        user.statistics.win_streak++;
                     }
                 }
             }else{
               user.statistics.losses++;
-              if(user.statistics.rank > 0){
-                user.statistics.rank--;
+
+                if(gType == 'ranked'){
+                    if(user.statistics.rank > 0){
+                        user.statistics.rank--;
+                    }
+
+                    user.statistics.win_streak = 0;
+                    user.statistics.win_rate--;
+                } 
               }
-              user.statistics.win_streak = 0;
-              user.statistics.win_rate--;
-            }
+              
 
             if(user.username == 'ttt1'){
                 user.statistics.rank = 50;
