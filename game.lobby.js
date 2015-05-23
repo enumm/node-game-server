@@ -101,7 +101,7 @@ lobby.findGame = function(player, gameType, friend, sockets, statistics) {
         while(iteration < this.game_count * iterationLimitMultiplier){
             console.log('MatchMaking Iteration: '+ iteration);
             if(gameType == 'casual'){
-            var filteredGames = this.games;
+            var filteredGames = filterGameType(this.games, gameType);
             }else{
             var filteredGames = filterGames(this.games, statistics, gameType, iteration);    
             }
