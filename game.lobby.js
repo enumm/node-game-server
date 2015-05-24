@@ -69,10 +69,10 @@ lobby.createGame = function(player, gameType, friend, sockets, hostStats) {
     player.game = thegame;
     player.hosting = true;
         
-    this.log('User "' + player.username + '" created a game with id ' + player.game.id);
+    this.log('User "' + player.username + '" Created a game with id ' + player.game.id);
 
     if(friend && sockets){
-        console.log('sending game invite to: ' + friend);
+        console.log('Sending game invite to: ' + friend);
         
         for(var i in sockets){
             if(sockets[i].username == friend)
@@ -335,14 +335,14 @@ lobby.checkGameStatus = function(gameid, database) {
             if(thegame.player_host){
                 delete thegame.player_host.game;
                 thegame.player_host.game = null;
-                thegame.player_host.emit('game_ended', {msg: 'you lost omg omg!'});
+                thegame.player_host.emit('game_ended', {msg: 'Defeat'});
                 database.update_statistics(false,  thegame.player_host.username, thegame.game_type);
             }
 
             if(thegame.player_client){
                 delete thegame.player_client.game;
                 thegame.player_client.game = null;
-                thegame.player_client.emit('game_ended', {msg: 'you won omg omg!'});
+                thegame.player_client.emit('game_ended', {msg: 'Victory'});
                 database.update_statistics(true, thegame.player_client.username, thegame.game_type);  
             }
 
@@ -363,14 +363,14 @@ lobby.checkGameStatus = function(gameid, database) {
             if(thegame.player_host){
                 delete thegame.player_host.game;
                 thegame.player_host.game = null;
-                thegame.player_host.emit('game_ended', {msg: 'you won omg omg!'});
+                thegame.player_host.emit('game_ended', {msg: 'Victory'});
                 database.update_statistics(true,  thegame.player_host.username, thegame.game_type);
             }
 
             if(thegame.player_client){
                 delete thegame.player_client.game;
                 thegame.player_client.game = null;
-                thegame.player_client.emit('game_ended', {msg: 'you lost omg omg'});
+                thegame.player_client.emit('game_ended', {msg: 'Defeat'});
                 database.update_statistics(false, thegame.player_client.username, thegame.game_type);
             }
 

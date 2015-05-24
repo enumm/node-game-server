@@ -131,7 +131,7 @@ io.on('connection', function (socket) {
       if(socket.username != data.friendName){
         database.add_friend(data, socket);
       }else{
-        socket.emit('friend_add_responce', {msg: 'cant add self', success: false});
+        socket.emit('friend_add_responce', {msg: 'Cant add self', success: false});
       }
     }
   });
@@ -141,7 +141,7 @@ io.on('connection', function (socket) {
       if(socket.username != data.friendName){
         database.delete_friend(data, socket);
       }else{
-        socket.emit('friend_add_responce', {msg: 'cant delete self', success: false});
+        socket.emit('friend_add_responce', {msg: 'Cant delete self', success: false});
       }
     }
   });

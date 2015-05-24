@@ -16,7 +16,7 @@ databaseEngine.init = function() {
 	dataBase = mongoose.connection;
 	dataBase.on('error', console.error.bind(console, 'connection error:'));
 	dataBase.once('open', function (callback) {
-	  console.log('Connected to database');
+        console.log('Connected to database');
 	});
 
 	userSchema = mongoose.Schema({
@@ -99,6 +99,7 @@ databaseEngine.register_user = function(data, socket) {
 		socket.emit('user_register_response',  {success: false, message: 'Username is too short'});
         return false;
     }
+    
     if(data.pass.length <  Const.DataBase.MinPassLenght){
     	socket.emit('user_register_response',  {success: false, message: 'Password is too short'});
         return false;
@@ -123,7 +124,7 @@ databaseEngine.register_user = function(data, socket) {
                             socket.emit('user_register_response',  {success: false, message: 'Database error :S'}); 
                         }
                         else if(user){
-                            console.log('user: "' + user.username + ' "created');
+                            console.log('user: "' + user.username + '" Created');
                             socket.emit('user_register_response',  {success: true, message: 'User: ' + user.username + ' created', loginData: data});    
                         }
                     });
@@ -188,7 +189,7 @@ databaseEngine.add_friend = function(data, socket) {
         for(var i = 0; i < user.friends.length; i++){
             if(user.friends[i].username == data.friendName){
                 alreadyAdded = true;
-                socket.emit('friend_add_responce', {msg: 'friend aldready added: ' + data.friendName, success: false});
+                socket.emit('friend_add_responce', {msg: 'Friend aldready added: ' + data.friendName, success: false});
             }
         }
 
@@ -197,11 +198,11 @@ databaseEngine.add_friend = function(data, socket) {
                 if(err){
                     console.error(err);
                 }else if(!foundFriend){
-                    socket.emit('friend_add_responce', {msg: 'user not found: ' + data.friendName, success: false});
+                    socket.emit('friend_add_responce', {msg: 'User not found: ' + data.friendName, success: false});
                 }else{
                     user.friends.push({username: foundFriend.username});
                     user.save(function(err, user){
-                        socket.emit('friend_add_responce', {msg: 'friend added: ' + foundFriend.username, success: true});
+                        socket.emit('friend_add_responce', {msg: 'Friend added: ' + foundFriend.username, success: true});
                         socket.emit('get_user_friends_response', user.friends);    
                     });
                 }
@@ -229,14 +230,12 @@ databaseEngine.delete_friend = function(data, socket) {
                 });
 
                 user.save(function(err, user){
-                    socket.emit('friend_add_responce', {msg: 'friend removed: ' + data.friendName, success: true});
+                    socket.emit('friend_add_responce', {msg: 'Friend removed: ' + data.friendName, success: true});
                     socket.emit('get_user_friends_response', user.friends);
                 });
             }else{
                 socket.emit('friend_add_responce', {msg: 'Friend not found: ' + data.friendName, success: false});
             }
-
-            
         }
     });
 };
