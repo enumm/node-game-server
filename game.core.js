@@ -157,7 +157,6 @@ game_core.prototype.addUnit = function(host, el){
 
     if(unitTilePos){
         var unitPos = this.mapToScreen(unitTilePos[0], unitTilePos[1]);
-        
         var unit = {
             name: host ? 'hunit' + this.hostData.unitCount++: 'ounit' + this.guestData.unitCount++,
             hp: this.c.UnitTypes[this.c.BuildingTypes[el.buildingType].unitType].life,
