@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "server whoaaaaaaaa herrro frie",
   "dependencies": {
-  	"socket.io" : "*",
+  	"socket.io" : "1.3.4",
   	"mongoose" : "*"
   },
   "author" : "Paulius Veliulis"
